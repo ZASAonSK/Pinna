@@ -137,7 +137,7 @@ jobs:
               "localizedDescription": f"Version {label}. See the release notes on GitHub.",
               "downloadURL": url,
               "size": size,
-              "minOSVersion": "17.0",
+              "minOSVersion": "16.0",
           }
           versions = [entry] + [v for v in app.get("versions", []) if v.get("version") != label][:19]
           app.update({

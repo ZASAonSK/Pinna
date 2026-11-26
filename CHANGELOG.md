@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0
+
+- Runs on **iOS 16** too. On iOS 17 and later everything looks and animates exactly as before; on iOS 16 the animations use the closest older equivalent, and the frosted-material design is used as on iOS 17–18.
+
 ## 1.0.3
 
 - Fixes connections being dropped right after they succeeded (1.0.1–1.0.2): iOS reports the app's own link as "earbuds connected", which made the app cancel and restart it; a retry on every broadcast also cancelled attempts that were about to succeed. The app now never cancels a link that is up, uses the connection notice only when nothing is pending, and renews only an attempt stuck for 30 seconds.

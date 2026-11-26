@@ -113,7 +113,7 @@ struct SoundView: View {
                         }
                     }
                     .padding(12)
-                    .animation(.smooth, value: store.values.equalizer)
+                    .animation(Motion.smooth, value: store.values.equalizer)
                 }
             }
             if buds.model.has(.balance) {

@@ -28,7 +28,7 @@ struct RootView: View {
         if onboarded {
             HomeView()
         } else {
-            OnboardingView { withAnimation(.smooth) { onboarded = true } }
+            OnboardingView { withAnimation(Motion.smooth) { onboarded = true } }
         }
     }
 }

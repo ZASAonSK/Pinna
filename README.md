@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/ZASAonSK/Pinna/actions/workflows/build.yml"><img src="https://github.com/ZASAonSK/Pinna/actions/workflows/build.yml/badge.svg" alt="Build"></a>
-  <img src="https://img.shields.io/badge/iOS-17%2B-blue" alt="iOS 17+">
+  <img src="https://img.shields.io/badge/iOS-16%2B-blue" alt="iOS 16+">
   <img src="https://img.shields.io/badge/Swift-SwiftUI-orange" alt="SwiftUI">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
 </p>
@@ -35,7 +35,7 @@
 - **Live battery** for the left and right earbud and the case.
 - **Live volume** — changes when you swipe on an earbud, and can be set from the app.
 - **Finds your earbuds automatically**, even if you renamed them.
-- **Liquid Glass** interface on iOS 26, frosted-material fallback on iOS 17–18.
+- **Liquid Glass** interface on iOS 26, frosted-material fallback on iOS 16–18.
 - **11 languages**, following your phone's language: English, Slovak, Czech, German, Spanish, French, Italian, Polish, Portuguese, Korean, Japanese.
 
 ## How it works
@@ -62,7 +62,7 @@ Whether a model exposes the Bluetooth LE data channel can only be confirmed on r
 
 ## Install
 
-There is no App Store build. Pinna is distributed as an **unsigned IPA** that you sign with your own Apple ID or developer certificate. Requires **iOS 17 or later**.
+There is no App Store build. Pinna is distributed as an **unsigned IPA** that you sign with your own Apple ID or developer certificate. Requires **iOS 16 or later**.
 
 Tap a button on your iPhone. It opens the app and adds the source:
 

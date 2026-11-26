@@ -205,7 +205,7 @@ private struct BatteryRing: View {
                     .trim(from: 0, to: CGFloat(level ?? 0) / 100)
                     .stroke(Palette.battery(level).gradient, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .animation(.smooth, value: level)
+                    .animation(Motion.smooth, value: level)
                 VStack(spacing: 0) {
                     Text(level.map { "\($0)" } ?? "–").font(.title3.bold()).contentTransition(.numericText())
                     if level != nil { Text("%").font(.caption2).foregroundStyle(.secondary) }
@@ -257,7 +257,7 @@ private struct NoiseControlCard: View {
                     }
                 }
             }
-            .animation(.smooth(duration: 0.35), value: current)
+            .animation(Motion.smooth(duration: 0.35), value: current)
 
             if let mode = current {
                 Label(L("%@ · set in the app", mode.subtitle), systemImage: "checkmark.circle").font(.footnote).foregroundStyle(.secondary)
@@ -308,7 +308,7 @@ struct LevelPicker: View {
                     .disabled(!buds.canControl)
                 }
             }
-            .animation(.smooth, value: value)
+            .animation(Motion.smooth, value: value)
         }
     }
 }
@@ -367,7 +367,7 @@ struct ToggleTile: View {
         .buttonStyle(.plain)
         .disabled(!buds.canControl)
         .opacity(buds.canControl ? 1 : 0.6)
-        .animation(.smooth, value: on)
+        .animation(Motion.smooth, value: on)
     }
 }
 
@@ -470,7 +470,7 @@ private struct VolumeCard: View {
         .glassCard()
         .disabled(!buds.canControl)
         .onAppear { value = Double(buds.volume ?? 0) }
-        .onChange(of: buds.volume) { _, new in if !editing, let new { withAnimation(.smooth) { value = Double(new) } } }
+        .onValueChange(of: buds.volume) { new in if !editing, let new { withAnimation(Motion.smooth) { value = Double(new) } } }
     }
 
     private var percent: Int { Int((Double(editing ? Int(value) : (buds.volume ?? 0)) / 255 * 100).rounded()) }

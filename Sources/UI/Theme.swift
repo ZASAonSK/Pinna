@@ -10,6 +10,29 @@ enum AppInfo {
     }
 }
 
+/// Animations that match iOS 17's `.smooth` and fall back to a close
+/// equivalent on iOS 16, so newer systems look exactly as before.
+enum Motion {
+    static var smooth: Animation { smooth(duration: 0.5) }
+    static func smooth(duration: Double) -> Animation {
+        if #available(iOS 17.0, *) { return .smooth(duration: duration) }
+        return .spring(response: duration, dampingFraction: 1)
+    }
+}
+
+extension View {
+    /// `onChange` with the new value: the iOS 17 API where available, the
+    /// iOS 16 one otherwise.
+    @ViewBuilder
+    func onValueChange<V: Equatable>(of value: V, perform action: @escaping (V) -> Void) -> some View {
+        if #available(iOS 17.0, *) {
+            self.onChange(of: value) { _, new in action(new) }
+        } else {
+            self.onChange(of: value, perform: action)
+        }
+    }
+}
+
 enum Haptics {
     static func tap() { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
     static func select() { UISelectionFeedbackGenerator().selectionChanged() }

@@ -30,6 +30,7 @@ struct BudsCommand: Equatable {
         static let balance: UInt8 = 0x8F
         static let lockTouchpad: UInt8 = 0x90
         static let touchHold: UInt8 = 0x92
+        static let touchHoldNoiseModes: UInt8 = 0x79
         static let edgeVolume: UInt8 = 0x95
         static let findStart: UInt8 = 0xA0
         static let findStop: UInt8 = 0xA1
@@ -59,6 +60,20 @@ struct BudsCommand: Equatable {
     static func neckStretch(_ on: Bool) -> BudsCommand { .init(ID.neckStretch, [flag(on)], "Neck reminder") }
     static func edgeVolume(_ on: Bool) -> BudsCommand { .init(ID.edgeVolume, [flag(on)], "Edge volume") }
     static func touchHold(left: Int, right: Int) -> BudsCommand { .init(ID.touchHold, [UInt8(left), UInt8(right)], "Touch and hold") }
+
+    /// Which noise modes pinch-and-hold cycles through, per earbud (Samsung
+    /// "Switch noise controls"): bit 0x08 ANC, 0x04 off, 0x02 adaptive, 0x01 ambient.
+    static func noiseModeMask(_ modes: Set<NoiseMode>) -> UInt8 {
+        var mask: UInt8 = 0
+        if modes.contains(.anc) { mask |= 0x08 }
+        if modes.contains(.off) { mask |= 0x04 }
+        if modes.contains(.adaptive) { mask |= 0x02 }
+        if modes.contains(.ambient) { mask |= 0x01 }
+        return mask
+    }
+    static func touchHoldNoiseModes(left: Set<NoiseMode>, right: Set<NoiseMode>) -> BudsCommand {
+        .init(ID.touchHoldNoiseModes, [noiseModeMask(left), noiseModeMask(right)], "Touch and hold noise modes")
+    }
     static func find(_ start: Bool) -> BudsCommand { .init(start ? ID.findStart : ID.findStop, [], start ? "Find start" : "Find stop") }
 
     static func touch(_ t: TouchSettings, layout: TouchLockLayout) -> BudsCommand {

@@ -47,6 +47,7 @@ Example: ANC on = `FD 04 00 78 01 D1 91 DD`.
 | `0x6E` | Calls to earbuds when inserted | `[off]` (inverted) |
 | `0x90` | Gestures and lights | see below |
 | `0x92` | Touch-and-hold action | `[left, right]` |
+| `0x79` | Noise modes for pinch-and-hold | `[left, right]`, bits `0x08` ANC, `0x04` off, `0x02` adaptive, `0x01` ambient |
 | `0x95` | Double-tap edge for volume | `[on]` (older models) |
 | `0xA0` / `0xA1` | Find My Earbuds start / stop | — |
 | `0xAF` | Seamless switching | `[off]` (inverted) |

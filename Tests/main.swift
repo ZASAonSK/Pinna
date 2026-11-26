@@ -153,6 +153,10 @@ precondition(BudsCommand.touch(touch, layout: .advancedLighting).payload == data
 precondition(BudsCommand.touch(touch, layout: .advanced).payload == data("00 01 01 01 01 01 01"))
 precondition(BudsCommand.touch(touch, layout: .single).payload == data("01"))
 
+// Pinch-and-hold noise modes (0x79): left ANC+off, right ambient+off.
+precondition(frameHex(BudsCommand.touchHoldNoiseModes(left: [.anc, .off], right: [.ambient, .off]).frame) == "FD 05 00 79 0C 05 51 53 DD")
+precondition(BudsCommand.noiseModeMask([.anc, .off, .adaptive, .ambient]) == 0x0F)
+
 // Model detection.
 precondition(BudsModel.detect(modelNumber: "SM-R630").id == "buds3pro")
 precondition(BudsModel.detect(modelNumber: "SM-R530").id == "buds3")

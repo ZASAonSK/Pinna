@@ -194,8 +194,18 @@ struct TouchView: View {
                 GlassSection(title: L("Pinch and hold actions"), symbol: "hand.point.up.left",
                              footer: L("What pinch and hold does on each earbud.")) {
                     HoldPicker(title: L("Left earbud"), value: store.values.holdLeft) { store.setHold(left: $0, right: store.values.holdRight) }
+                    if store.values.holdLeft == 2, buds.model.noiseModes.count > 2 {
+                        HoldModesRow(modes: buds.model.noiseModes, selected: store.holdModes(left: true)) {
+                            store.setHoldModes(left: $0, right: store.holdModes(left: false))
+                        }
+                    }
                     RowDivider()
                     HoldPicker(title: L("Right earbud"), value: store.values.holdRight) { store.setHold(left: store.values.holdLeft, right: $0) }
+                    if store.values.holdRight == 2, buds.model.noiseModes.count > 2 {
+                        HoldModesRow(modes: buds.model.noiseModes, selected: store.holdModes(left: false)) {
+                            store.setHoldModes(left: store.holdModes(left: true), right: $0)
+                        }
+                    }
                 }
             }
             if buds.model.has(.lighting) {
@@ -233,6 +243,46 @@ struct TouchView: View {
         var t = store.values.touch
         change(&t)
         store.setTouch(t)
+    }
+}
+
+/// Chips for the noise modes pinch-and-hold switches between on one earbud.
+/// At least two must stay selected, as in Samsung's app.
+private struct HoldModesRow: View {
+    let modes: [NoiseMode]
+    let selected: Set<NoiseMode>
+    let set: (Set<NoiseMode>) -> Void
+    @EnvironmentObject private var buds: BudsController
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(L("Switches between")).font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                ForEach(modes) { mode in
+                    let on = selected.contains(mode)
+                    Button {
+                        var next = selected
+                        if on { next.remove(mode) } else { next.insert(mode) }
+                        if next.count >= 2 { set(next) } else { Haptics.select() }
+                    } label: {
+                        Text(mode.title)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 9)
+                            .foregroundStyle(on ? .white : .primary)
+                            .background(Capsule().fill(on ? AnyShapeStyle(Palette.gradient) : AnyShapeStyle(.primary.opacity(0.08))))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!buds.canControl)
+                }
+            }
+            Text(L("Choose at least two modes.")).font(.caption2).foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 12)
+        .animation(Motion.smooth, value: selected)
     }
 }
 

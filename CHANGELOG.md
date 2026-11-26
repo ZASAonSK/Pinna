@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+
+- Choose which noise modes pinch-and-hold switches between, separately for each earbud (e.g. left: ANC ↔ Off, right: Ambient ↔ Off), like "Switch noise controls" in Samsung's app. Shown under *Gestures & lights → Pinch and hold actions* when an earbud is set to Noise control; at least two modes stay selected.
+
 ## 1.1.0
 
 - Runs on **iOS 16** too. On iOS 17 and later everything looks and animates exactly as before; on iOS 16 the animations use the closest older equivalent, and the frosted-material design is used as on iOS 17–18.

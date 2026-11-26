@@ -175,3 +175,5 @@
 "Solid" = "단색";
 "Breathing" = "숨쉬기";
 "Still not connecting? Put the earbuds in pairing mode – Pinna connects right away." = "아직 연결되지 않나요? 이어버드를 페어링 모드로 전환하면 Pinna가 바로 연결됩니다.";
+"Switches between" = "전환할 모드";
+"Choose at least two modes." = "모드를 두 개 이상 선택하세요.";

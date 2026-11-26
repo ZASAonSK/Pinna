@@ -20,6 +20,9 @@ struct BudsSettings: Codable, Equatable {
     var edgeVolume = false
     var holdLeft = 2
     var holdRight = 2
+    /// Noise modes pinch-and-hold switches between; nil = default (ANC, ambient).
+    var holdModesLeft: Set<NoiseMode>?
+    var holdModesRight: Set<NoiseMode>?
     var touch = TouchSettings()
 }
 
@@ -81,6 +84,13 @@ final class SettingsStore: ObservableObject {
     func setSeamless(_ on: Bool) { apply(.seamless(on)) { $0.seamless = on } }
     func setNeckStretch(_ on: Bool) { apply(.neckStretch(on)) { $0.neckStretch = on } }
     func setEdgeVolume(_ on: Bool) { apply(.edgeVolume(on)) { $0.edgeVolume = on } }
+    static let defaultHoldModes: Set<NoiseMode> = [.anc, .ambient]
+    func holdModes(left: Bool) -> Set<NoiseMode> {
+        (left ? values.holdModesLeft : values.holdModesRight) ?? Self.defaultHoldModes
+    }
+    func setHoldModes(left: Set<NoiseMode>, right: Set<NoiseMode>) {
+        apply(.touchHoldNoiseModes(left: left, right: right)) { $0.holdModesLeft = left; $0.holdModesRight = right }
+    }
     func setHold(left: Int, right: Int) { apply(.touchHold(left: left, right: right)) { $0.holdLeft = left; $0.holdRight = right } }
     func setTouch(_ t: TouchSettings) { apply(.touch(t, layout: model.touchLayout)) { $0.touch = t } }
 

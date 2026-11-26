@@ -1,0 +1,174 @@
+name: Build and release
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'LICENSE', '.gitignore', 'docs/**']
+  workflow_dispatch:
+permissions:
+  contents: write   # create the tag and the release
+concurrency:
+  group: release
+  cancel-in-progress: false
+jobs:
+  build:
+    # Xcode 26 on macos-26 provides the Liquid Glass SDK.
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # tags are needed to number revisions
+      - name: Work out the version
+        run: |
+          set -euo pipefail
+          VERSION=$(sed -n 's/.*MARKETING_VERSION: "\(.*\)"/\1/p' project.yml)
+          git fetch --tags --force -q
+          # A new MARKETING_VERSION gives release v<version>. Pushing code without bumping it
+          # gives revisions v<version>.1, .2, ... so AltStore still sees a newer version.
+          if git rev-parse -q --verify "refs/tags/v$VERSION" > /dev/null; then
+            N=$(git tag -l "v$VERSION.*" | wc -l | tr -d ' ')
+            LABEL="$VERSION.$((N + 1))"
+          else
+            LABEL="$VERSION"
+          fi
+          {
+            echo "VERSION=$VERSION"
+            echo "LABEL=$LABEL"
+            echo "TAG=v$LABEL"
+            echo "BUILD=${{ github.run_number }}"
+          } >> "$GITHUB_ENV"
+          echo "Building $LABEL"
+      - name: Test protocol, models and decoder
+        run: |
+          set -euo pipefail
+          swiftc Sources/Protocol/*.swift Sources/App/Localization.swift Tests/main.swift -o /tmp/pinna-tests
+          /tmp/pinna-tests
+      - name: Check translations
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, re, sys
+          def entries(path):
+              return dict(re.findall(r'^"((?:[^"\\]|\\.)*)" = "((?:[^"\\]|\\.)*)";$', open(path, encoding="utf-8").read(), re.M))
+          base = entries("Sources/Resources/en.lproj/Localizable.strings")
+          ok = True
+          for path in sorted(glob.glob("Sources/Resources/*.lproj/Localizable.strings")):
+              t = entries(path)
+              if set(t) != set(base):
+                  ok = False; print(f"::error::{path}: keys differ from English")
+              for k, v in t.items():
+                  if sorted(re.findall(r"%(?:@|ld|%)", k)) != sorted(re.findall(r"%(?:@|ld|%)", v)):
+                      ok = False; print(f"::error::{path}: placeholder mismatch in {k!r}")
+          sys.exit(0 if ok else 1)
+          PY
+      - name: Install XcodeGen
+        run: command -v xcodegen || brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build unsigned IPA
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild -project Pinna.xcodeproj -scheme Pinna -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION="$LABEL" CURRENT_PROJECT_VERSION="$BUILD" build 2>&1 | tee build.log
+          rm -rf Payload
+          mkdir -p Payload artifact
+          cp -R build/Build/Products/Release-iphoneos/Pinna.app Payload/
+          zip -qry artifact/Pinna.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pinna-${{ env.LABEL }}-ipa
+          path: artifact/Pinna.ipa
+          if-no-files-found: error
+      - name: Publish release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Release notes: the CHANGELOG section for a new version, otherwise generated from commits.
+          NOTES_ARGS=(--generate-notes)
+          if [ "$LABEL" = "$VERSION" ]; then
+            awk -v v="$VERSION" '/^## /{p = index($0, "## " v) == 1; next} p' CHANGELOG.md > notes.md
+            if [ -n "$(tr -d '[:space:]' < notes.md)" ]; then NOTES_ARGS=(--notes-file notes.md); fi
+          fi
+          gh release create "$TAG" artifact/Pinna.ipa --target "$GITHUB_SHA" --title "Pinna $LABEL" "${NOTES_ARGS[@]}"
+      - name: Update the AltStore source
+        if: github.ref == 'refs/heads/main'
+        env:
+          SOURCE_KEY: ${{ secrets.ALTSTORE_REPO_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SOURCE_KEY" ]; then
+            echo "::warning::ALTSTORE_REPO_KEY is not set, so the AltStore source was not updated"
+            exit 0
+          fi
+          # The source lives in its own repository (<owner>/altstore-repo) and lists several apps.
+          # A deploy key that can write only to that repository is stored as the ALTSTORE_REPO_KEY secret.
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SOURCE_KEY" > ~/.ssh/altstore_key
+          chmod 600 ~/.ssh/altstore_key
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/altstore_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          rm -rf source
+          git clone --quiet --depth 1 "git@github.com:${GITHUB_REPOSITORY_OWNER}/altstore-repo.git" source
+          python3 - <<'PY'
+          import json, os
+          repo, tag, label = os.environ["GITHUB_REPOSITORY"], os.environ["TAG"], os.environ["LABEL"]
+          base = f"https://github.com/{repo}"
+          icon = f"https://raw.githubusercontent.com/{repo}/main/Assets.xcassets/AppIcon.appiconset/icon-1024.png"
+          size = os.path.getsize("artifact/Pinna.ipa")
+          date = os.popen("date -u +%Y-%m-%d").read().strip()
+          url = f"{base}/releases/download/{tag}/Pinna.ipa"
+          blurb = ("Control Samsung Galaxy Buds from your iPhone: noise cancelling, ambient sound and adaptive mode, "
+                   "ANC and ambient levels, equalizer, balance, gestures and lights, in-ear detection, game mode and Find My Earbuds. "
+                   "Live battery for both earbuds and the case, and live volume.")
+          note = ("Unofficial and open source. Verified on Galaxy Buds3 Pro; other models are experimental. "
+                  "The earbuds do not report their current mode to an iPhone, so the app shows what you set in it.")
+          permission = "Pinna connects to your Galaxy Buds over Bluetooth to control them and show their battery and volume."
+          bundle = "io.github.zasaonsk.pinna"
+          source = json.load(open("source/altstore.json"))
+          app = next((a for a in source["apps"] if a.get("bundleIdentifier") == bundle), None)
+          if app is None:
+              app = {"bundleIdentifier": bundle}
+              source["apps"].append(app)
+          entry = {
+              "version": label,
+              "buildVersion": os.environ["BUILD"],
+              "date": date,
+              "localizedDescription": f"Version {label}. See the release notes on GitHub.",
+              "downloadURL": url,
+              "size": size,
+              "minOSVersion": "17.0",
+          }
+          versions = [entry] + [v for v in app.get("versions", []) if v.get("version") != label][:19]
+          app.update({
+              "name": "Pinna",
+              "developerName": repo.split("/")[0],
+              "subtitle": "Control Galaxy Buds on iPhone",
+              "localizedDescription": blurb + "\n\n" + note,
+              "iconURL": icon,
+              "tintColor": "2A9D9A",
+              "category": "utilities",
+              "screenshotURLs": [],
+              "versions": versions,
+              # fields read by older AltStore versions
+              "version": label,
+              "versionDate": date,
+              "versionDescription": f"Version {label}",
+              "downloadURL": url,
+              "size": size,
+              "appPermissions": {"entitlements": [], "privacy": {"NSBluetoothAlwaysUsageDescription": permission}},
+          })
+          json.dump(source, open("source/altstore.json", "w"), indent=2, ensure_ascii=False)
+          PY
+          python3 -m json.tool source/altstore.json > /dev/null
+          cd source
+          git add altstore.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m "Pinna $LABEL"
+          git push -q origin HEAD:main
+      - name: Build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+          if-no-files-found: ignore

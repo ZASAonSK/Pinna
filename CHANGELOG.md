@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2
+
+- Fixes 1.0.1 not connecting at all: the iOS auto-reconnect option made every connection attempt to Galaxy Buds3 Pro fail, and the app retried in a tight loop. The option is gone and a failed attempt now waits 3 seconds before the next one. Reconnecting after Bluetooth is toggled or the case is reopened is kept.
+
 ## 1.0.1
 
 - Reconnects after Bluetooth is turned off and on or the case is closed and reopened: Pinna now notices when the earbuds reconnect to the phone and brings its own link back up, lets iOS re-establish the link automatically, and renews a connection attempt that hangs for more than 20 seconds.

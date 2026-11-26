@@ -93,8 +93,11 @@ final class BudsController: NSObject, ObservableObject {
     private var knownID: UUID? = UserDefaults.standard.string(forKey: "pinna.peripheral").flatMap(UUID.init)
     /// When the current connect attempt was (re)issued.
     private var connectIssued: Date?
-    /// iOS keeps re-establishing the link by itself after it drops (iOS 17+).
-    private let connectOptions: [String: Any] = [CBConnectPeripheralOptionEnableAutoReconnect: true]
+    /// No special options: CBConnectPeripheralOptionEnableAutoReconnect made
+    /// every connect to Galaxy Buds3 Pro fail with "invalid parameters" (1.0.1).
+    private let connectOptions: [String: Any] = [:]
+    /// After a failed attempt, wait a moment instead of retrying in a tight loop.
+    private var retryNotBefore = Date.distantPast
 
     override init() {
         super.init()
@@ -225,7 +228,8 @@ final class BudsController: NSObject, ObservableObject {
 
     /// Cancel the pending attempt and start a new one on a fresh handle.
     private func reissueConnect(reason: String) {
-        guard central.state == .poweredOn, state != .ready, let id = knownID ?? peripheral?.identifier else { return }
+        guard central.state == .poweredOn, state != .ready, Date() >= retryNotBefore,
+              let id = knownID ?? peripheral?.identifier else { return }
         if let issued = connectIssued, Date().timeIntervalSince(issued) < 5 { return }
         note("Reconnecting (\(reason))")
         if let old = peripheral { central.cancelPeripheralConnection(old) }
@@ -258,6 +262,7 @@ final class BudsController: NSObject, ObservableObject {
     }
 
     private func connect(_ p: CBPeripheral) {
+        guard Date() >= retryNotBefore else { return }
         // A second connect to the same buds would cancel the pending one.
         if let current = peripheral, current.identifier == p.identifier, state == .connecting || state == .ready { return }
         if let old = peripheral, old.identifier != p.identifier { central.cancelPeripheralConnection(old) }
@@ -370,6 +375,7 @@ extension BudsController: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didFailToConnect p: CBPeripheral, error: Error?) {
         guard p.identifier == peripheral?.identifier else { return }
         note("Connection failed: \(error?.localizedDescription ?? "-")")
+        retryNotBefore = Date().addingTimeInterval(3)
         peripheral = nil
         state = .searching
     }

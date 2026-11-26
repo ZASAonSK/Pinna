@@ -145,5 +145,6 @@ UI text goes through `L("English text")`; the English text is the key, so a miss
 ## Acknowledgements
 
 - [GalaxyBudsClient](https://github.com/timschneeb/GalaxyBudsClient) by timschneeb and [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) — reference for the Galaxy Buds message protocol.
+- [SamsungGalaxyBuds2Pro](https://github.com/msrk0320/SamsungGalaxyBuds2Pro) by msrk0320 — showed that settings can be written over the Bluetooth LE data channel.
 
 Pinna contains no code from these projects.

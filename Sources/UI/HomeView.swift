@@ -162,7 +162,7 @@ private struct ConnectionBanner: View {
         case .bluetoothOff: return L("Pinna needs Bluetooth to find your earbuds.")
         case .unauthorized: return L("Allow Bluetooth in Settings → Pinna.")
         case .noControlPath: return L("This device has no Samsung data channel. If these aren't your earbuds, choose others.")
-        case .connecting: return L("One moment… If it takes long, open the case or put the earbuds in your ears.")
+        case .connecting: return L("One moment… If it takes long, open the case or put the earbuds in your ears.") + "\n" + L("Still not connecting? Put the earbuds in pairing mode – Pinna connects right away.")
         default: return L("Keep your earbuds near the phone (case open or in your ears) and pick them from the list. Next time Pinna connects on its own.")
         }
     }

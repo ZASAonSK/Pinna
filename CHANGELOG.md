@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- Reconnects after Bluetooth is turned off and on or the case is closed and reopened: Pinna now notices when the earbuds reconnect to the phone and brings its own link back up, lets iOS re-establish the link automatically, and renews a connection attempt that hangs for more than 20 seconds.
+- If the earbuds still don't connect, the app suggests pairing mode.
+
 ## 1.0.0
 
 First release of Pinna.

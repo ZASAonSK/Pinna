@@ -91,6 +91,10 @@ final class BudsController: NSObject, ObservableObject {
     private var observers: [NSObjectProtocol] = []
     private var token: Data? = UserDefaults.standard.data(forKey: "pinna.adv.token")
     private var knownID: UUID? = UserDefaults.standard.string(forKey: "pinna.peripheral").flatMap(UUID.init)
+    /// When the current connect attempt was (re)issued.
+    private var connectIssued: Date?
+    /// iOS keeps re-establishing the link by itself after it drops (iOS 17+).
+    private let connectOptions: [String: Any] = [CBConnectPeripheralOptionEnableAutoReconnect: true]
 
     override init() {
         super.init()
@@ -201,8 +205,38 @@ final class BudsController: NSObject, ObservableObject {
         retryTimer = Timer.scheduledTimer(withTimeInterval: 8, repeats: true) { [weak self] _ in
             guard let self = self, self.central.state == .poweredOn,
                   UIApplication.shared.applicationState == .active else { return }
-            if self.peripheral == nil { self.findConnectedBuds() }
+            if self.peripheral == nil {
+                self.findConnectedBuds()
+            } else if self.state == .connecting, let issued = self.connectIssued, Date().timeIntervalSince(issued) > 20 {
+                // After Bluetooth is toggled or the case is reopened a pending
+                // connect can go stale; issue a fresh one.
+                self.reissueConnect(reason: "still connecting after 20 s")
+            }
         }
+        watchConnectionEvents()
+    }
+
+    /// iOS reports when the buds connect to the phone (e.g. audio after the
+    /// case is opened); that is the moment to bring up our LE link too.
+    private func watchConnectionEvents() {
+        guard let id = knownID else { return }
+        central.registerForConnectionEvents(options: [.peripheralUUIDs: [id]])
+    }
+
+    /// Cancel the pending attempt and start a new one on a fresh handle.
+    private func reissueConnect(reason: String) {
+        guard central.state == .poweredOn, state != .ready, let id = knownID ?? peripheral?.identifier else { return }
+        if let issued = connectIssued, Date().timeIntervalSince(issued) < 5 { return }
+        note("Reconnecting (\(reason))")
+        if let old = peripheral { central.cancelPeripheralConnection(old) }
+        let fresh = central.retrieveConnectedPeripherals(withServices: [Self.dataPathService, Self.batteryService])
+            .first(where: { $0.identifier == id }) ?? central.retrievePeripherals(withIdentifiers: [id]).first
+        guard let p = fresh else { return }
+        peripheral = p
+        p.delegate = self
+        state = .connecting
+        connectIssued = Date()
+        central.connect(p, options: connectOptions)
     }
 
     private func startScan() {
@@ -230,8 +264,9 @@ final class BudsController: NSObject, ObservableObject {
         peripheral = p
         p.delegate = self
         state = .connecting
+        connectIssued = Date()
         note("Connecting to \(p.name ?? p.identifier.uuidString)")
-        central.connect(p, options: nil)
+        central.connect(p, options: connectOptions)
     }
 
     private func upsertNearby(id: UUID, name: String, rssi: Int, connected: Bool, audioHint: Bool = false) {
@@ -293,6 +328,10 @@ extension BudsController: CBCentralManagerDelegate {
             UserDefaults.standard.set(t, forKey: "pinna.adv.token")
         }
         guard decoded.token == nil || decoded.token == token else { return }
+        // Our buds are awake and advertising: a good moment to retry.
+        if state == .connecting, let issued = connectIssued, Date().timeIntervalSince(issued) > 10 {
+            reissueConnect(reason: "buds advertising")
+        }
         var b = advBattery
         if let v = decoded.a { b.left = v }
         if let v = decoded.b { b.right = v }
@@ -309,7 +348,9 @@ extension BudsController: CBCentralManagerDelegate {
         guard p.identifier == peripheral?.identifier else { return }
         peripheral = p
         p.delegate = self
+        connectIssued = nil
         knownID = p.identifier
+        watchConnectionEvents()
         UserDefaults.standard.set(p.identifier.uuidString, forKey: "pinna.peripheral")
         if let name = p.name {
             deviceName = name
@@ -318,6 +359,12 @@ extension BudsController: CBCentralManagerDelegate {
         note("Connected to \(p.name ?? "?")")
         rx = nil; batteryRoles.removeAll(); gattBattery.removeAll()
         p.discoverServices([Self.dataPathService, Self.batteryService, Self.deviceInfo, Self.volumeService])
+    }
+
+    func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for p: CBPeripheral) {
+        guard event == .peerConnected, p.identifier == knownID, state != .ready else { return }
+        note("Earbuds connected to the phone")
+        reissueConnect(reason: "earbuds connected to the phone")
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect p: CBPeripheral, error: Error?) {
@@ -335,7 +382,8 @@ extension BudsController: CBCentralManagerDelegate {
         if central.state == .poweredOn {
             // Reconnect right away; iOS completes it when the buds are back.
             state = .connecting
-            central.connect(p, options: nil)
+            connectIssued = Date()
+            central.connect(p, options: connectOptions)
         } else {
             peripheral = nil
         }

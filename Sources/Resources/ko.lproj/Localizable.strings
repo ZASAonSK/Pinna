@@ -188,3 +188,9 @@
 "Noise control: %@" = "소음 제어: %@";
 "Shortcuts & Control Center" = "단축어 및 제어 센터";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "‘노이즈 캔슬링 전환’을 제어 센터(제어 센터 편집 → 제어 항목 추가 → 단축어), 동작 버튼 또는 Siri에 추가하세요. 앱을 열지 않아도 작동합니다.";
+"Open Pinna once to connect." = "연결하려면 Pinna를 한 번 여세요.";
+"Battery of your earbuds and the case." = "이어버드와 케이스의 배터리.";
+"Switch noise control from the Home Screen." = "홈 화면에서 소음 제어를 전환합니다.";
+"Battery & noise control" = "배터리 및 소음 제어";
+"Switches noise cancelling on or off." = "노이즈 캔슬링을 켜거나 끕니다.";
+"Sets this noise mode." = "이 소음 모드로 설정합니다.";

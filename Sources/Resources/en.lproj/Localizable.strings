@@ -188,3 +188,9 @@
 "Noise control: %@" = "Noise control: %@";
 "Shortcuts & Control Center" = "Shortcuts & Control Center";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app.";
+"Open Pinna once to connect." = "Open Pinna once to connect.";
+"Battery of your earbuds and the case." = "Battery of your earbuds and the case.";
+"Switch noise control from the Home Screen." = "Switch noise control from the Home Screen.";
+"Battery & noise control" = "Battery & noise control";
+"Switches noise cancelling on or off." = "Switches noise cancelling on or off.";
+"Sets this noise mode." = "Sets this noise mode.";

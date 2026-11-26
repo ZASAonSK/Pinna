@@ -188,3 +188,9 @@
 "Noise control: %@" = "Geräuschsteuerung: %@";
 "Shortcuts & Control Center" = "Kurzbefehle & Kontrollzentrum";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Füge „Geräuschunterdrückung umschalten“ zum Kontrollzentrum hinzu (Kontrollzentrum bearbeiten → Steuerelement hinzufügen → Kurzbefehle), zur Aktionstaste oder frag Siri. Es funktioniert, ohne die App zu öffnen.";
+"Open Pinna once to connect." = "Öffne Pinna einmal, um zu verbinden.";
+"Battery of your earbuds and the case." = "Akku deiner Ohrhörer und des Case.";
+"Switch noise control from the Home Screen." = "Geräuschsteuerung direkt vom Home-Bildschirm wechseln.";
+"Battery & noise control" = "Akku & Geräuschsteuerung";
+"Switches noise cancelling on or off." = "Schaltet die Geräuschunterdrückung ein oder aus.";
+"Sets this noise mode." = "Stellt diesen Geräuschmodus ein.";

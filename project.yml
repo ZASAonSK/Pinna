@@ -3,6 +3,12 @@ options:
   developmentLanguage: en
   deploymentTarget:
     iOS: "16.0"
+settings:
+  base:
+    MARKETING_VERSION: "1.6.0"
+    CURRENT_PROJECT_VERSION: 1
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
 targets:
   Pinna:
     type: application
@@ -10,6 +16,8 @@ targets:
     sources:
       - Sources
       - Assets.xcassets
+    dependencies:
+      - target: PinnaWidgets
     info:
       path: Pinna-Info.plist
       properties:
@@ -20,11 +28,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.zasaonsk.pinna
         PRODUCT_NAME: Pinna
-        SWIFT_VERSION: "5.0"
-        MARKETING_VERSION: "1.5.0"
-        CURRENT_PROJECT_VERSION: 1
-        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_ENTITLEMENTS: Pinna.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Pinna
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
@@ -33,3 +38,27 @@ targets:
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Pinna connects to your Galaxy Buds over Bluetooth to control them and show their battery and volume.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: ""
+  # Home Screen / Lock Screen widgets and Control Center controls (iOS 18).
+  PinnaWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Sources/Shared
+      - Sources/Protocol/BudsModel.swift
+      - Sources/App/Localization.swift
+      - Sources/Resources
+    info:
+      path: PinnaWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Pinna
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.zasaonsk.pinna.widgets
+        PRODUCT_NAME: PinnaWidgets
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_ENTITLEMENTS: Pinna.entitlements
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) WIDGET_EXTENSION"
+        APPLICATION_EXTENSION_API_ONLY: YES

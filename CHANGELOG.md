@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.0
+
+- **Widgets**: Battery (Home Screen and Lock Screen – circular, rectangular and inline), Noise control (small and medium, with mode buttons on iOS 17+) and Battery & noise control (medium and large).
+- **Control Center controls (iOS 18)**: a Noise cancelling toggle that shows the current state, plus Ambient, Off and Adaptive buttons – with their own icons, no Shortcuts needed.
+- All of it is optional: add only what you want. Widget buttons and controls run in the app, which keeps the Bluetooth link in the background.
+- Note for free Apple IDs: the widget extension uses one more App ID when sideloading.
+
 ## 1.5.0
 
 - Control noise cancelling without opening the app: new actions "Toggle noise cancelling" (ANC ↔ Ambient) and "Set noise control" for Control Center (iOS 18: edit Control Center → Add a Control → Shortcuts), the Action button, Siri and the Shortcuts app. They use the same Bluetooth link as the app, which stays connected in the background since 1.4.0.

@@ -79,6 +79,17 @@ jobs:
           rm -rf Payload
           mkdir -p Payload artifact
           cp -R build/Build/Products/Release-iphoneos/Pinna.app Payload/
+          # Widgets extension must be embedded.
+          APPEX=Payload/Pinna.app/PlugIns/PinnaWidgets.appex
+          test -x "$APPEX/PinnaWidgets"
+          plutil -extract NSExtension.NSExtensionPointIdentifier raw -o - "$APPEX/Info.plist" | grep -q widgetkit-extension
+          # Unsigned builds carry no entitlements; embed the App Group with a fake
+          # signature so AltStore / SideStore / Feather keep it when they re-sign.
+          command -v ldid || brew install ldid
+          ldid -SPinna.entitlements "$APPEX/PinnaWidgets"
+          ldid -SPinna.entitlements Payload/Pinna.app/Pinna
+          ldid -e Payload/Pinna.app/Pinna | grep -q group.io.github.zasaonsk.pinna
+          ldid -e "$APPEX/PinnaWidgets" | grep -q group.io.github.zasaonsk.pinna
           zip -qry artifact/Pinna.ipa Payload
       - uses: actions/upload-artifact@v4
         with:

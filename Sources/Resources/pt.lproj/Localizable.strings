@@ -188,3 +188,9 @@
 "Noise control: %@" = "Controle de ruído: %@";
 "Shortcuts & Control Center" = "Atalhos e Central de Controle";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Adicione “Alternar cancelamento de ruído” à Central de Controle (edite a Central de Controle → Adicionar um Controle → Atalhos), ao botão de Ação ou peça à Siri. Funciona sem abrir o app.";
+"Open Pinna once to connect." = "Abra o Pinna uma vez para conectar.";
+"Battery of your earbuds and the case." = "Bateria dos fones e do estojo.";
+"Switch noise control from the Home Screen." = "Mude o controle de ruído na Tela de Início.";
+"Battery & noise control" = "Bateria e controle de ruído";
+"Switches noise cancelling on or off." = "Ativa ou desativa o cancelamento de ruído.";
+"Sets this noise mode." = "Ajusta este modo de ruído.";

@@ -74,7 +74,10 @@ final class SettingsStore: ObservableObject {
 
     // MARK: - Setters used by the UI
 
-    func setNoise(_ mode: NoiseMode) { apply(.noise(mode)) { $0.noiseMode = mode } }
+    func setNoise(_ mode: NoiseMode) {
+        apply(.noise(mode)) { $0.noiseMode = mode }
+        if values.noiseMode == mode { WidgetSync.shared.update { $0.noiseMode = mode.rawValue } }
+    }
     func setAncLevel(_ v: Int) { apply(.ancLevel(v, levels: model.ancLevels)) { $0.ancLevel = v } }
     func setAmbientLevel(_ v: Int) { apply(.ambientLevel(v, levels: model.ambientLevels)) { $0.ambientLevel = v } }
     func setVoiceDetect(_ on: Bool) { apply(.voiceDetect(on)) { $0.voiceDetect = on } }

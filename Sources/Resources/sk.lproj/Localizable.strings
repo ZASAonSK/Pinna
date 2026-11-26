@@ -188,3 +188,9 @@
 "Noise control: %@" = "Ovládanie hluku: %@";
 "Shortcuts & Control Center" = "Skratky a Ovládacie centrum";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Pridaj „Prepnúť potlačenie hluku“ do Ovládacieho centra (uprav Ovládacie centrum → Pridať ovládač → Skratky), na tlačidlo Akcia alebo to povedz Siri. Funguje to bez otvárania appky.";
+"Open Pinna once to connect." = "Otvor raz Pinnu, aby sa pripojila.";
+"Battery of your earbuds and the case." = "Batéria slúchadiel a puzdra.";
+"Switch noise control from the Home Screen." = "Prepínaj ovládanie hluku priamo z plochy.";
+"Battery & noise control" = "Batéria a ovládanie hluku";
+"Switches noise cancelling on or off." = "Zapne alebo vypne potlačenie hluku.";
+"Sets this noise mode." = "Nastaví tento režim hluku.";

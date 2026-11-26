@@ -188,3 +188,9 @@
 "Noise control: %@" = "ノイズコントロール: %@";
 "Shortcuts & Control Center" = "ショートカットとコントロールセンター";
 "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "「ノイズキャンセリングを切り替え」をコントロールセンター(コントロールセンターを編集 → コントロールを追加 → ショートカット)、アクションボタン、Siriに追加できます。アプリを開かなくても動作します。";
+"Open Pinna once to connect." = "接続するにはPinnaを一度開いてください。";
+"Battery of your earbuds and the case." = "イヤホンとケースのバッテリー。";
+"Switch noise control from the Home Screen." = "ホーム画面からノイズコントロールを切り替えます。";
+"Battery & noise control" = "バッテリーとノイズコントロール";
+"Switches noise cancelling on or off." = "ノイズキャンセリングをオン/オフします。";
+"Sets this noise mode." = "このノイズモードに設定します。";

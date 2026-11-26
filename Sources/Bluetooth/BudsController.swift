@@ -66,12 +66,22 @@ final class BudsController: NSObject, ObservableObject {
     static let volumeState = CBUUID(string: "2B7D")        // [volume 0…255, mute, change counter]
     static let volumeControlPoint = CBUUID(string: "2B7E") // [opcode, change counter, (volume)]
 
-    @Published private(set) var state: LinkState = .searching
-    @Published private(set) var deviceName: String?
+    @Published private(set) var state: LinkState = .searching {
+        didSet { if state != oldValue { WidgetSync.shared.update { $0.connected = state == .ready } } }
+    }
+    @Published private(set) var deviceName: String? {
+        didSet { if deviceName != oldValue { WidgetSync.shared.update { $0.deviceName = deviceName } } }
+    }
     @Published private(set) var model: BudsModel = .unknown
     @Published private(set) var modelNumber: String?
     @Published private(set) var firmware: String?
-    @Published private(set) var battery = BatteryLevels()
+    @Published private(set) var battery = BatteryLevels() {
+        didSet {
+            WidgetSync.shared.update {
+                $0.left = battery.left; $0.right = battery.right; $0.caseLevel = battery.caseLevel
+            }
+        }
+    }
     @Published private(set) var volume: Int?
     @Published private(set) var muted = false
     @Published private(set) var nearby: [NearbyDevice] = []

@@ -32,7 +32,9 @@
 - **Sound** — 6 equalizer presets plus a 9-band custom equalizer, left/right balance, ambient sound during calls, game mode.
 - **Gestures & lights** — turn individual pinch gestures on or off, choose touch-and-hold actions and the light style.
 - **More** — voice detect, ANC with one earbud, in-ear detection for media and calls, seamless switching, neck stretch reminder, Find My Earbuds.
-- **Control Center, Action button & Siri** — "Toggle noise cancelling" and "Set noise control" actions that work without opening the app (add them via the Shortcuts control in Control Center on iOS 18).
+- **Widgets** — battery on the Home Screen and Lock Screen, noise-control buttons, and a combined battery + noise widget.
+- **Control Center (iOS 18)** — a Noise cancelling toggle with live state plus Ambient, Off and Adaptive buttons.
+- **Action button, Siri & Shortcuts** — "Toggle noise cancelling" and "Set noise control" actions that work without opening the app.
 - **Live battery** for the left and right earbud and the case.
 - **Live volume** — changes when you swipe on an earbud, and can be set from the app.
 - **Finds your earbuds automatically**, even if you renamed them.
@@ -63,7 +65,7 @@ Whether a model exposes the Bluetooth LE data channel can only be confirmed on r
 
 ## Install
 
-There is no App Store build. Pinna is distributed as an **unsigned IPA** that you sign with your own Apple ID or developer certificate. Requires **iOS 16 or later**.
+There is no App Store build. Pinna is distributed as an **unsigned IPA** that you sign with your own Apple ID or developer certificate. Requires **iOS 16 or later**. The widgets live in an app extension, so with a free Apple ID sideloading uses one more App ID.
 
 Tap a button on your iPhone. It opens the app and adds the source:
 

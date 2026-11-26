@@ -210,10 +210,11 @@ final class BudsController: NSObject, ObservableObject {
                   UIApplication.shared.applicationState == .active else { return }
             if self.peripheral == nil {
                 self.findConnectedBuds()
-            } else if self.state == .connecting, let issued = self.connectIssued, Date().timeIntervalSince(issued) > 20 {
+            } else if self.state == .connecting, self.peripheral?.state != .connected,
+                      let issued = self.connectIssued, Date().timeIntervalSince(issued) > 30 {
                 // After Bluetooth is toggled or the case is reopened a pending
                 // connect can go stale; issue a fresh one.
-                self.reissueConnect(reason: "still connecting after 20 s")
+                self.reissueConnect(reason: "still connecting after 30 s")
             }
         }
         watchConnectionEvents()
@@ -229,6 +230,7 @@ final class BudsController: NSObject, ObservableObject {
     /// Cancel the pending attempt and start a new one on a fresh handle.
     private func reissueConnect(reason: String) {
         guard central.state == .poweredOn, state != .ready, Date() >= retryNotBefore,
+              peripheral?.state != .connected,
               let id = knownID ?? peripheral?.identifier else { return }
         if let issued = connectIssued, Date().timeIntervalSince(issued) < 5 { return }
         note("Reconnecting (\(reason))")
@@ -333,10 +335,6 @@ extension BudsController: CBCentralManagerDelegate {
             UserDefaults.standard.set(t, forKey: "pinna.adv.token")
         }
         guard decoded.token == nil || decoded.token == token else { return }
-        // Our buds are awake and advertising: a good moment to retry.
-        if state == .connecting, let issued = connectIssued, Date().timeIntervalSince(issued) > 10 {
-            reissueConnect(reason: "buds advertising")
-        }
         var b = advBattery
         if let v = decoded.a { b.left = v }
         if let v = decoded.b { b.right = v }
@@ -367,9 +365,11 @@ extension BudsController: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for p: CBPeripheral) {
-        guard event == .peerConnected, p.identifier == knownID, state != .ready else { return }
+        // iOS also reports our own LE link here, so this must never cancel
+        // anything; it only starts a connect when none is pending.
+        guard event == .peerConnected, p.identifier == knownID, peripheral == nil else { return }
         note("Earbuds connected to the phone")
-        reissueConnect(reason: "earbuds connected to the phone")
+        connect(p)
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect p: CBPeripheral, error: Error?) {

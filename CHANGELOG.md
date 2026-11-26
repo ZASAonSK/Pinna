@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- Fixes connections being dropped right after they succeeded (1.0.1–1.0.2): iOS reports the app's own link as "earbuds connected", which made the app cancel and restart it; a retry on every broadcast also cancelled attempts that were about to succeed. The app now never cancels a link that is up, uses the connection notice only when nothing is pending, and renews only an attempt stuck for 30 seconds.
+
 ## 1.0.2
 
 - Fixes 1.0.1 not connecting at all: the iOS auto-reconnect option made every connection attempt to Galaxy Buds3 Pro fail, and the app retried in a tight loop. The option is gone and a failed attempt now waits 3 seconds before the next one. Reconnecting after Bluetooth is toggled or the case is reopened is kept.

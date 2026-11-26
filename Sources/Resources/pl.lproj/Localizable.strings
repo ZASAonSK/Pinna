@@ -180,3 +180,11 @@
 "Custom" = "Własny";
 "Reset" = "Resetuj";
 "Drag a band up or down. Changes are sent when you let go." = "Przeciągnij pasmo w górę lub w dół. Zmiana zostanie wysłana po puszczeniu.";
+"Noise mode" = "Tryb hałasu";
+"Set noise control" = "Ustaw kontrolę hałasu";
+"Toggle noise cancelling" = "Przełącz redukcję hałasu";
+"Sets the noise control mode of your earbuds." = "Ustawia tryb kontroli hałasu w słuchawkach.";
+"Switches the earbuds between noise cancelling and ambient sound." = "Przełącza słuchawki między redukcją hałasu a dźwiękiem otoczenia.";
+"Noise control: %@" = "Kontrola hałasu: %@";
+"Shortcuts & Control Center" = "Skróty i Centrum sterowania";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Dodaj „Przełącz redukcję hałasu” do Centrum sterowania (edytuj Centrum sterowania → Dodaj element → Skróty), do przycisku czynności lub poproś Siri. Działa bez otwierania aplikacji.";

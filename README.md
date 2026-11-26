@@ -32,6 +32,7 @@
 - **Sound** — 6 equalizer presets plus a 9-band custom equalizer, left/right balance, ambient sound during calls, game mode.
 - **Gestures & lights** — turn individual pinch gestures on or off, choose touch-and-hold actions and the light style.
 - **More** — voice detect, ANC with one earbud, in-ear detection for media and calls, seamless switching, neck stretch reminder, Find My Earbuds.
+- **Control Center, Action button & Siri** — "Toggle noise cancelling" and "Set noise control" actions that work without opening the app (add them via the Shortcuts control in Control Center on iOS 18).
 - **Live battery** for the left and right earbud and the case.
 - **Live volume** — changes when you swipe on an earbud, and can be set from the app.
 - **Finds your earbuds automatically**, even if you renamed them.

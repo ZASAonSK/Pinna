@@ -180,3 +180,11 @@
 "Custom" = "Eigene";
 "Reset" = "Zurücksetzen";
 "Drag a band up or down. Changes are sent when you let go." = "Ziehe ein Band nach oben oder unten. Die Änderung wird beim Loslassen gesendet.";
+"Noise mode" = "Geräuschmodus";
+"Set noise control" = "Geräuschsteuerung einstellen";
+"Toggle noise cancelling" = "Geräuschunterdrückung umschalten";
+"Sets the noise control mode of your earbuds." = "Stellt den Geräuschmodus deiner Ohrhörer ein.";
+"Switches the earbuds between noise cancelling and ambient sound." = "Wechselt zwischen Geräuschunterdrückung und Umgebungsklang.";
+"Noise control: %@" = "Geräuschsteuerung: %@";
+"Shortcuts & Control Center" = "Kurzbefehle & Kontrollzentrum";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Füge „Geräuschunterdrückung umschalten“ zum Kontrollzentrum hinzu (Kontrollzentrum bearbeiten → Steuerelement hinzufügen → Kurzbefehle), zur Aktionstaste oder frag Siri. Es funktioniert, ohne die App zu öffnen.";

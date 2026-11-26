@@ -6,9 +6,8 @@ struct PinnaApp: App {
     @StateObject private var store: SettingsStore
 
     init() {
-        let controller = BudsController()
-        _controller = StateObject(wrappedValue: controller)
-        _store = StateObject(wrappedValue: SettingsStore(controller: controller))
+        _controller = StateObject(wrappedValue: BudsController.shared)
+        _store = StateObject(wrappedValue: SettingsStore.shared)
     }
 
     var body: some Scene {

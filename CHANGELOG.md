@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+
+- Control noise cancelling without opening the app: new actions "Toggle noise cancelling" (ANC ↔ Ambient) and "Set noise control" for Control Center (iOS 18: edit Control Center → Add a Control → Shortcuts), the Action button, Siri and the Shortcuts app. They use the same Bluetooth link as the app, which stays connected in the background since 1.4.0.
+- *More features* explains how to add them.
+
 ## 1.4.0
 
 - Faster start: Pinna now keeps the Bluetooth link to your earbuds while it is closed (background Bluetooth with state restoration), so the controls are usually ready the moment you open it. If iOS ends the app in the background, it relaunches it with the existing link. Nothing else runs in the background.

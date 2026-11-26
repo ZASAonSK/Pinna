@@ -180,3 +180,11 @@
 "Custom" = "Personalizado";
 "Reset" = "Redefinir";
 "Drag a band up or down. Changes are sent when you let go." = "Arraste uma banda para cima ou para baixo. As alterações são enviadas ao soltar.";
+"Noise mode" = "Modo de ruído";
+"Set noise control" = "Ajustar controle de ruído";
+"Toggle noise cancelling" = "Alternar cancelamento de ruído";
+"Sets the noise control mode of your earbuds." = "Ajusta o modo de controle de ruído dos seus fones.";
+"Switches the earbuds between noise cancelling and ambient sound." = "Alterna os fones entre cancelamento de ruído e som ambiente.";
+"Noise control: %@" = "Controle de ruído: %@";
+"Shortcuts & Control Center" = "Atalhos e Central de Controle";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Adicione “Alternar cancelamento de ruído” à Central de Controle (edite a Central de Controle → Adicionar um Controle → Atalhos), ao botão de Ação ou peça à Siri. Funciona sem abrir o app.";

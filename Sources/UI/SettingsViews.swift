@@ -373,6 +373,12 @@ struct MoreView: View {
                     }
                 }
             }
+            GlassSection(title: L("Shortcuts & Control Center"), symbol: "switch.2") {
+                Text(L("Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app."))
+                    .font(.subheadline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
+            }
         }
     }
 }

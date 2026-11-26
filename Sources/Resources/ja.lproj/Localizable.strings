@@ -180,3 +180,11 @@
 "Custom" = "カスタム";
 "Reset" = "リセット";
 "Drag a band up or down. Changes are sent when you let go." = "バンドを上下にドラッグしてください。指を離すと変更が送信されます。";
+"Noise mode" = "ノイズモード";
+"Set noise control" = "ノイズコントロールを設定";
+"Toggle noise cancelling" = "ノイズキャンセリングを切り替え";
+"Sets the noise control mode of your earbuds." = "イヤホンのノイズコントロールモードを設定します。";
+"Switches the earbuds between noise cancelling and ambient sound." = "ノイズキャンセリングと外音取り込みを切り替えます。";
+"Noise control: %@" = "ノイズコントロール: %@";
+"Shortcuts & Control Center" = "ショートカットとコントロールセンター";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "「ノイズキャンセリングを切り替え」をコントロールセンター(コントロールセンターを編集 → コントロールを追加 → ショートカット)、アクションボタン、Siriに追加できます。アプリを開かなくても動作します。";

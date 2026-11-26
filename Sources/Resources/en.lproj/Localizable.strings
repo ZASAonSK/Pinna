@@ -180,3 +180,11 @@
 "Custom" = "Custom";
 "Reset" = "Reset";
 "Drag a band up or down. Changes are sent when you let go." = "Drag a band up or down. Changes are sent when you let go.";
+"Noise mode" = "Noise mode";
+"Set noise control" = "Set noise control";
+"Toggle noise cancelling" = "Toggle noise cancelling";
+"Sets the noise control mode of your earbuds." = "Sets the noise control mode of your earbuds.";
+"Switches the earbuds between noise cancelling and ambient sound." = "Switches the earbuds between noise cancelling and ambient sound.";
+"Noise control: %@" = "Noise control: %@";
+"Shortcuts & Control Center" = "Shortcuts & Control Center";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app.";

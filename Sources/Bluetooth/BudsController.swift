@@ -50,6 +50,10 @@ struct LogLine: Identifiable {
 /// (docs/PROTOCOL.md). Settings shown in the app are therefore the last
 /// values sent, kept by `SettingsStore`.
 final class BudsController: NSObject, ObservableObject {
+    /// One controller for the app and its App Intents (Shortcuts, Siri,
+    /// Control Center, Action button), so they share the same link.
+    static let shared = BudsController()
+
     static let dataPathService = CBUUID(string: "A7A473E9-19C6-491B-AEA6-7EA92B8F043A")
     static let dataPathRX = CBUUID(string: "A7A48311-19C6-491B-AEA6-7EA92B8F043A")   // phone → buds
     static let batteryService = CBUUID(string: "180F")

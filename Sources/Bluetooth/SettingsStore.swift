@@ -35,6 +35,8 @@ final class SettingsStore: ObservableObject {
     private var modelID = BudsModel.unknown.id
     private var cancellables: Set<AnyCancellable> = []
 
+    static let shared = SettingsStore(controller: .shared)
+
     init(controller: BudsController) {
         self.controller = controller
         controller.$model

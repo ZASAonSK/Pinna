@@ -180,3 +180,11 @@
 "Custom" = "사용자 지정";
 "Reset" = "재설정";
 "Drag a band up or down. Changes are sent when you let go." = "대역을 위아래로 드래그하세요. 손을 떼면 변경 사항이 전송됩니다.";
+"Noise mode" = "소음 모드";
+"Set noise control" = "소음 제어 설정";
+"Toggle noise cancelling" = "노이즈 캔슬링 전환";
+"Sets the noise control mode of your earbuds." = "이어버드의 소음 제어 모드를 설정합니다.";
+"Switches the earbuds between noise cancelling and ambient sound." = "노이즈 캔슬링과 주변 소리 사이를 전환합니다.";
+"Noise control: %@" = "소음 제어: %@";
+"Shortcuts & Control Center" = "단축어 및 제어 센터";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "‘노이즈 캔슬링 전환’을 제어 센터(제어 센터 편집 → 제어 항목 추가 → 단축어), 동작 버튼 또는 Siri에 추가하세요. 앱을 열지 않아도 작동합니다.";

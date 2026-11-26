@@ -180,3 +180,11 @@
 "Custom" = "Vlastný";
 "Reset" = "Vynulovať";
 "Drag a band up or down. Changes are sent when you let go." = "Potiahni pásmo hore alebo dole. Zmena sa pošle, keď pustíš.";
+"Noise mode" = "Režim hluku";
+"Set noise control" = "Nastaviť ovládanie hluku";
+"Toggle noise cancelling" = "Prepnúť potlačenie hluku";
+"Sets the noise control mode of your earbuds." = "Nastaví režim ovládania hluku na slúchadlách.";
+"Switches the earbuds between noise cancelling and ambient sound." = "Prepne slúchadlá medzi potlačením hluku a zvukom okolia.";
+"Noise control: %@" = "Ovládanie hluku: %@";
+"Shortcuts & Control Center" = "Skratky a Ovládacie centrum";
+"Add “Toggle noise cancelling” to Control Center (edit Control Center → Add a Control → Shortcuts), to the Action button or ask Siri. It works without opening the app." = "Pridaj „Prepnúť potlačenie hluku“ do Ovládacieho centra (uprav Ovládacie centrum → Pridať ovládač → Skratky), na tlačidlo Akcia alebo to povedz Siri. Funguje to bez otvárania appky.";

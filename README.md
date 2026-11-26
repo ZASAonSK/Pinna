@@ -16,6 +16,14 @@
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/home.jpeg" width="23%" alt="Home: battery, volume and noise control">&nbsp;
+  <img src="docs/screenshots/sound.jpeg" width="23%" alt="Sound: equalizer and balance">&nbsp;
+  <img src="docs/screenshots/gestures.jpeg" width="23%" alt="Gestures and lights">&nbsp;
+  <img src="docs/screenshots/more.jpeg" width="23%" alt="More features">
+</p>
+<p align="center"><sub>Home · Sound · Gestures &amp; lights · More features</sub></p>
+
 > **Unofficial project.** Not affiliated with, endorsed by or sponsored by Samsung. *Samsung* and *Galaxy Buds* are trademarks of Samsung Electronics.
 
 ## Features

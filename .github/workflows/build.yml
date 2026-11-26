@@ -148,7 +148,7 @@ jobs:
               "iconURL": icon,
               "tintColor": "2A9D9A",
               "category": "utilities",
-              "screenshotURLs": [],
+              "screenshotURLs": [f"https://raw.githubusercontent.com/{repo}/main/docs/screenshots/{n}.jpeg" for n in ("home", "sound", "gestures", "more")],
               "versions": versions,
               # fields read by older AltStore versions
               "version": label,

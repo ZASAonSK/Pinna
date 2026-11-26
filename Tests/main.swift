@@ -157,6 +157,11 @@ precondition(BudsCommand.touch(touch, layout: .single).payload == data("01"))
 precondition(frameHex(BudsCommand.touchHoldNoiseModes(left: [.anc, .off], right: [.ambient, .off]).frame) == "FD 05 00 79 0C 05 51 53 DD")
 precondition(BudsCommand.noiseModeMask([.anc, .off, .adaptive, .ambient]) == 0x0F)
 
+// Custom equalizer (0x89): [9, bands…], signed −10…+10, clamped.
+precondition(frameHex(BudsCommand.customEqualizer([1, -1, 0, 0, 0, 0, 0, 0, 14]).frame) == "FD 0D 00 89 09 01 FF 00 00 00 00 00 00 0A 45 08 DD")
+precondition(BudsCommand.equalizer(6).payload == data("06"))
+precondition(BudsModel.detect(modelNumber: "SM-R630").has(.customEqualizer))
+
 // Model detection.
 precondition(BudsModel.detect(modelNumber: "SM-R630").id == "buds3pro")
 precondition(BudsModel.detect(modelNumber: "SM-R530").id == "buds3")

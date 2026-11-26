@@ -32,7 +32,7 @@ enum NoiseMode: UInt8, CaseIterable, Identifiable, Codable {
 enum Feature: String, CaseIterable, Codable {
     case ancLevel, ambientLevel, voiceDetect, ancOneEarbud, equalizer, balance, sidetone
     case gamingMode, inEarDetection, touchLock, touchHold, findMyBuds, seamless
-    case neckStretch, lighting, edgeVolume
+    case neckStretch, lighting, edgeVolume, customEqualizer
 }
 
 /// Layout of LOCK_TOUCHPAD (0x90), which differs per generation.
@@ -109,24 +109,24 @@ struct BudsModel: Equatable, Identifiable {
                   touchLayout: .advanced, paddedAncOneEarbud: false, verified: false, symbol: "earbuds"),
         BudsModel(id: "buds3", name: "Galaxy Buds3", modelNumbers: ["SM-R530"], names: ["Buds3"],
                   colorIDs: [333, 334], legacyFrame: false, noiseModes: [.off, .anc, .ambient], ancLevels: 0, ambientLevels: 3,
-                  features: [.ambientLevel, .equalizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
+                  features: [.ambientLevel, .equalizer, .customEqualizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
                   touchLayout: .advanced, paddedAncOneEarbud: false, verified: false, symbol: "earbuds"),
         BudsModel(id: "buds3pro", name: "Galaxy Buds3 Pro", modelNumbers: ["SM-R630"], names: ["Buds3 Pro"],
                   colorIDs: [340, 341], legacyFrame: false, noiseModes: [.off, .anc, .ambient, .adaptive], ancLevels: 5, ambientLevels: 5,
-                  features: [.ancLevel, .ambientLevel, .voiceDetect, .ancOneEarbud, .equalizer, .balance, .sidetone, .gamingMode,
+                  features: [.ancLevel, .ambientLevel, .voiceDetect, .ancOneEarbud, .equalizer, .customEqualizer, .balance, .sidetone, .gamingMode,
                              .inEarDetection, .touchLock, .touchHold, .findMyBuds, .seamless, .neckStretch, .lighting],
                   touchLayout: .advancedLighting, paddedAncOneEarbud: true, verified: true, symbol: "earbuds"),
         BudsModel(id: "buds3fe", name: "Galaxy Buds3 FE", modelNumbers: ["SM-R420"], names: ["Buds3 FE"],
                   colorIDs: [347, 348], legacyFrame: false, noiseModes: [.off, .anc, .ambient], ancLevels: 2, ambientLevels: 3,
-                  features: [.ancLevel, .ambientLevel, .equalizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
+                  features: [.ancLevel, .ambientLevel, .equalizer, .customEqualizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
                   touchLayout: .advanced, paddedAncOneEarbud: false, verified: false, symbol: "earbuds"),
         BudsModel(id: "buds4", name: "Galaxy Buds4", modelNumbers: ["SM-R540"], names: ["Buds4"],
                   colorIDs: [355, 356], legacyFrame: false, noiseModes: [.off, .anc, .ambient, .adaptive], ancLevels: 0, ambientLevels: 3,
-                  features: [.ambientLevel, .equalizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
+                  features: [.ambientLevel, .equalizer, .customEqualizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
                   touchLayout: .advanced, paddedAncOneEarbud: false, verified: false, symbol: "earbuds"),
         BudsModel(id: "buds4pro", name: "Galaxy Buds4 Pro", modelNumbers: ["SM-R640"], names: ["Buds4 Pro"],
                   colorIDs: [359, 360, 361], legacyFrame: false, noiseModes: [.off, .anc, .ambient, .adaptive], ancLevels: 0, ambientLevels: 5,
-                  features: [.ambientLevel, .voiceDetect, .equalizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
+                  features: [.ambientLevel, .voiceDetect, .equalizer, .customEqualizer, .touchLock, .touchHold, .sidetone, .seamless, .gamingMode, .balance, .ancOneEarbud, .findMyBuds, .inEarDetection],
                   touchLayout: .advanced, paddedAncOneEarbud: false, verified: false, symbol: "earbuds"),
     ]
 

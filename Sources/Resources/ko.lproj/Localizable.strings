@@ -177,3 +177,6 @@
 "Still not connecting? Put the earbuds in pairing mode – Pinna connects right away." = "아직 연결되지 않나요? 이어버드를 페어링 모드로 전환하면 Pinna가 바로 연결됩니다.";
 "Switches between" = "전환할 모드";
 "Choose at least two modes." = "모드를 두 개 이상 선택하세요.";
+"Custom" = "사용자 지정";
+"Reset" = "재설정";
+"Drag a band up or down. Changes are sent when you let go." = "대역을 위아래로 드래그하세요. 손을 떼면 변경 사항이 전송됩니다.";

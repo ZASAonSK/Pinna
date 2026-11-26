@@ -29,7 +29,7 @@
 ## Features
 
 - **Noise control** — Off, ANC, Ambient and Adaptive, plus ANC strength and ambient volume (5 steps on Buds3 Pro).
-- **Sound** — 6 equalizer presets, left/right balance, ambient sound during calls, game mode.
+- **Sound** — 6 equalizer presets plus a 9-band custom equalizer, left/right balance, ambient sound during calls, game mode.
 - **Gestures & lights** — turn individual pinch gestures on or off, choose touch-and-hold actions and the light style.
 - **More** — voice detect, ANC with one earbud, in-ear detection for media and calls, seamless switching, neck stretch reminder, Find My Earbuds.
 - **Live battery** for the left and right earbud and the case.

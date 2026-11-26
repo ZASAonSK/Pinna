@@ -39,7 +39,8 @@ Example: ANC on = `FD 04 00 78 01 D1 91 DD`.
 | `0x84` | Ambient volume | `[0…4]` on Buds3 Pro |
 | `0x6F` | Noise control with one earbud | `[0, 0, on]` on Buds3 Pro, `[on]` on older models |
 | `0x7A` | Voice detect | `[on]` |
-| `0x86` | Equalizer preset | `[0…5]` |
+| `0x86` | Equalizer preset | `[0…5]`, `6` = custom |
+| `0x89` | Custom equalizer | `[9, band1…band9]`, 63 Hz – 16 kHz, each −10…+10 (signed byte); then `0x86 [6]` |
 | `0x8F` | Balance | `[0…32]`, 16 = centre |
 | `0x8B` | Ambient sound during calls | `[on]` |
 | `0x85` | Game mode | `[on]` |

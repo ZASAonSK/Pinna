@@ -10,6 +10,8 @@ struct BudsSettings: Codable, Equatable {
     var voiceDetect = false
     var ancOneEarbud = false
     var equalizer = 0
+    /// Custom equalizer curve, 9 bands −10…+10; nil = flat.
+    var customEqualizer: [Int]?
     var balance = 16
     var sidetone = false
     var gamingMode = false
@@ -75,7 +77,20 @@ final class SettingsStore: ObservableObject {
     func setAmbientLevel(_ v: Int) { apply(.ambientLevel(v, levels: model.ambientLevels)) { $0.ambientLevel = v } }
     func setVoiceDetect(_ on: Bool) { apply(.voiceDetect(on)) { $0.voiceDetect = on } }
     func setAncOneEarbud(_ on: Bool) { apply(.ancOneEarbud(on, padded: model.paddedAncOneEarbud)) { $0.ancOneEarbud = on } }
-    func setEqualizer(_ v: Int) { apply(.equalizer(v)) { $0.equalizer = v } }
+    func setEqualizer(_ v: Int) {
+        if v == BudsCommand.customPreset { setCustomEqualizer(customBands); return }
+        apply(.equalizer(v)) { $0.equalizer = v }
+    }
+    var customBands: [Int] { values.customEqualizer ?? Array(repeating: 0, count: BudsCommand.customBands.count) }
+    /// Like Samsung's app: send the curve, then select the custom preset.
+    func setCustomEqualizer(_ bands: [Int]) {
+        guard controller.send(.customEqualizer(bands)) else { return }
+        controller.send(.equalizer(BudsCommand.customPreset))
+        values.customEqualizer = bands
+        values.equalizer = BudsCommand.customPreset
+        save()
+        Haptics.tap()
+    }
     func setBalance(_ v: Int) { apply(.balance(v)) { $0.balance = v } }
     func setSidetone(_ on: Bool) { apply(.sidetone(on)) { $0.sidetone = on } }
     func setGamingMode(_ on: Bool) { apply(.gamingMode(on)) { $0.gamingMode = on } }

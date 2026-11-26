@@ -31,6 +31,7 @@ struct BudsCommand: Equatable {
         static let lockTouchpad: UInt8 = 0x90
         static let touchHold: UInt8 = 0x92
         static let touchHoldNoiseModes: UInt8 = 0x79
+        static let customEqualizer: UInt8 = 0x89
         static let edgeVolume: UInt8 = 0x95
         static let findStart: UInt8 = 0xA0
         static let findStop: UInt8 = 0xA1
@@ -49,7 +50,20 @@ struct BudsCommand: Equatable {
     static func ancOneEarbud(_ on: Bool, padded: Bool) -> BudsCommand {
         .init(ID.ancOneEarbud, padded ? [0, 0, flag(on)] : [flag(on)], "ANC with one earbud")
     }
-    static func equalizer(_ preset: Int) -> BudsCommand { .init(ID.equalizer, [clamp(preset, 5)], "Equalizer") }
+    static func equalizer(_ preset: Int) -> BudsCommand { .init(ID.equalizer, [clamp(preset, customPreset)], "Equalizer") }
+
+    /// Preset index Samsung uses for the custom curve.
+    static let customPreset = 6
+    static let customBands = ["63", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"]
+    /// Custom equalizer (Buds3 / Buds3 Pro plugin): `[9, band1 … band9]`,
+    /// each band −10…+10 as a signed byte, lowest frequency first.
+    static func customEqualizer(_ bands: [Int]) -> BudsCommand {
+        let values = (0..<customBands.count).map { i -> UInt8 in
+            let v = i < bands.count ? max(-10, min(10, bands[i])) : 0
+            return UInt8(bitPattern: Int8(v))
+        }
+        return .init(ID.customEqualizer, [UInt8(customBands.count)] + values, "Custom equalizer")
+    }
     static func balance(_ value: Int) -> BudsCommand { .init(ID.balance, [clamp(value, 32)], "Balance") }
     static func sidetone(_ on: Bool) -> BudsCommand { .init(ID.sidetone, [flag(on)], "Sidetone") }
     static func gamingMode(_ on: Bool) -> BudsCommand { .init(ID.gamingMode, [flag(on)], "Game mode") }

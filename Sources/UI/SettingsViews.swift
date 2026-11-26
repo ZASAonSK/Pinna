@@ -85,10 +85,13 @@ struct SoundView: View {
     @EnvironmentObject private var store: SettingsStore
     @State private var balance: Double = 16
 
-    private let presets: [(String, String)] = [
+    private let basePresets: [(String, String)] = [
         (L("Normal"), "equal"), (L("Bass boost"), "speaker.wave.3"), (L("Soft"), "leaf"),
         (L("Dynamic"), "bolt"), (L("Clear"), "sparkle"), (L("Treble boost"), "arrow.up.right"),
     ]
+    private var presets: [(String, String)] {
+        basePresets + (buds.model.has(.customEqualizer) ? [(L("Custom"), "slider.horizontal.3")] : [])
+    }
 
     var body: some View {
         SettingsPage(title: L("Sound")) {
@@ -114,6 +117,10 @@ struct SoundView: View {
                     }
                     .padding(12)
                     .animation(Motion.smooth, value: store.values.equalizer)
+                    if store.values.equalizer == BudsCommand.customPreset, buds.model.has(.customEqualizer) {
+                        RowDivider()
+                        CustomEqualizerEditor()
+                    }
                 }
             }
             if buds.model.has(.balance) {
@@ -379,4 +386,50 @@ struct LightStyle: Identifiable {
         LightStyle(id: 2, title: L("Solid"), symbol: "sun.max.fill"),
         LightStyle(id: 3, title: L("Breathing"), symbol: "wind"),
     ]
+}
+
+/// Nine vertical band sliders (63 Hz … 16 kHz, −10…+10) like Samsung's
+/// custom equalizer. The curve is sent when a slider is released.
+private struct CustomEqualizerEditor: View {
+    @EnvironmentObject private var buds: BudsController
+    @EnvironmentObject private var store: SettingsStore
+    @State private var bands: [Double] = Array(repeating: 0, count: BudsCommand.customBands.count)
+
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .bottom, spacing: 0) {
+                ForEach(BudsCommand.customBands.indices, id: \.self) { i in
+                    VStack(spacing: 6) {
+                        Text(label(Int(bands[i]))).font(.caption2.monospacedDigit().weight(.semibold))
+                        Slider(value: $bands[i], in: -10...10, step: 1) { editing in
+                            if !editing { send() }
+                        }
+                        .tint(Palette.accent)
+                        .rotationEffect(.degrees(-90))
+                        .frame(width: 150)
+                        .frame(width: 32, height: 150)
+                        Text(BudsCommand.customBands[i]).font(.caption2).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            HStack {
+                Text(L("Drag a band up or down. Changes are sent when you let go."))
+                    .font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Button(L("Reset")) {
+                    bands = Array(repeating: 0, count: bands.count)
+                    send()
+                }
+                .font(.footnote)
+                .glassButton()
+            }
+        }
+        .padding(16)
+        .disabled(!buds.canControl)
+        .onAppear { bands = store.customBands.map(Double.init) }
+    }
+
+    private func label(_ v: Int) -> String { v > 0 ? "+\(v)" : "\(v)" }
+    private func send() { store.setCustomEqualizer(bands.map { Int($0) }) }
 }

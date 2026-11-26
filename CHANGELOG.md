@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+- Custom equalizer: a 7th preset "Custom" with nine bands (63 Hz – 16 kHz, −10 … +10) and a reset button, sent exactly like Samsung's app does (curve first, then the custom preset). Available on Galaxy Buds3, Buds3 Pro, Buds3 FE, Buds4 and Buds4 Pro.
+
 ## 1.2.0
 
 - Choose which noise modes pinch-and-hold switches between, separately for each earbud (e.g. left: ANC ↔ Off, right: Ambient ↔ Off), like "Switch noise controls" in Samsung's app. Shown under *Gestures & lights → Pinch and hold actions* when an earbud is set to Noise control; at least two modes stay selected.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+
+- Faster start: Pinna now keeps the Bluetooth link to your earbuds while it is closed (background Bluetooth with state restoration), so the controls are usually ready the moment you open it. If iOS ends the app in the background, it relaunches it with the existing link. Nothing else runs in the background.
+
 ## 1.3.0
 
 - Custom equalizer: a 7th preset "Custom" with nine bands (63 Hz – 16 kHz, −10 … +10) and a reset button, sent exactly like Samsung's app does (curve first, then the custom preset). Available on Galaxy Buds3, Buds3 Pro, Buds3 FE, Buds4 and Buds4 Pro.

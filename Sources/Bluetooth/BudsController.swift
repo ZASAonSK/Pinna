@@ -106,7 +106,10 @@ final class BudsController: NSObject, ObservableObject {
             modelNumber = number
             model = BudsModel.detect(modelNumber: number, name: deviceName)
         }
-        central = CBCentralManager(delegate: self, queue: .main)
+        // Restore identifier: iOS keeps our link alive in the background and
+        // relaunches the app with it if the system had to terminate the app.
+        central = CBCentralManager(delegate: self, queue: .main,
+                                   options: [CBCentralManagerOptionRestoreIdentifierKey: "pinna.central"])
         let nc = NotificationCenter.default
         observers.append(nc.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
             self?.resume()
@@ -304,10 +307,30 @@ final class BudsController: NSObject, ObservableObject {
 // MARK: - CBCentralManagerDelegate
 
 extension BudsController: CBCentralManagerDelegate {
+    /// Called before `centralManagerDidUpdateState` when iOS relaunches the
+    /// app in the background or hands back a link kept while it was closed.
+    func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
+        guard let list = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral],
+              let p = list.first(where: { $0.identifier == knownID }) ?? list.first else { return }
+        peripheral = p
+        p.delegate = self
+        state = .connecting
+        note("Restored link to \(p.name ?? "earbuds") (\(p.state == .connected ? "connected" : "pending"))")
+    }
+
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
             if state == .bluetoothOff || state == .unauthorized { state = .searching }
+            if let p = peripheral, rx == nil {
+                // A restored link: services must be discovered again; a restored
+                // pending connect is re-issued so it keeps running.
+                if p.state == .connected {
+                    p.discoverServices([Self.dataPathService, Self.batteryService, Self.deviceInfo, Self.volumeService])
+                } else if p.state == .disconnected {
+                    central.connect(p, options: connectOptions)
+                }
+            }
             resume()
         case .unauthorized:
             state = .unauthorized

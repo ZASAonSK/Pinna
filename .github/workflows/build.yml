@@ -70,6 +70,12 @@ jobs:
           set -euo pipefail
           xcodebuild -version
           xcodebuild -project Pinna.xcodeproj -scheme Pinna -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION="$LABEL" CURRENT_PROJECT_VERSION="$BUILD" build 2>&1 | tee build.log
+          # The generated Info.plist must keep background Bluetooth and the usual keys.
+          PLIST=build/Build/Products/Release-iphoneos/Pinna.app/Info.plist
+          plutil -p "$PLIST" | grep -E 'UIBackgroundModes|bluetooth-central|NSBluetoothAlwaysUsageDescription|CFBundleDisplayName' || true
+          plutil -extract UIBackgroundModes json -o - "$PLIST" | grep -q bluetooth-central
+          plutil -extract NSBluetoothAlwaysUsageDescription raw -o - "$PLIST" > /dev/null
+          [ "$(plutil -extract CFBundleDisplayName raw -o - "$PLIST")" = "Pinna" ]
           rm -rf Payload
           mkdir -p Payload artifact
           cp -R build/Build/Products/Release-iphoneos/Pinna.app Payload/

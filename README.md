@@ -101,6 +101,7 @@ You can also download `Pinna.ipa` from the latest [Release](../../releases/lates
 
 - No network requests, analytics or third-party SDKs.
 - Stored locally on your device: the identifier of the selected earbuds and the settings you last sent. **Device → Forget earbuds** and **Diagnostics → Clear saved settings** delete them.
+- Background Bluetooth is used only to keep the link to your earbuds, so the controls are ready when you open the app.
 - The diagnostics log stays on your device unless you share it.
 
 ## Build from source

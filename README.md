@@ -17,12 +17,13 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.jpeg" width="23%" alt="Home: battery, volume and noise control">&nbsp;
-  <img src="docs/screenshots/sound.jpeg" width="23%" alt="Sound: equalizer and balance">&nbsp;
-  <img src="docs/screenshots/gestures.jpeg" width="23%" alt="Gestures and lights">&nbsp;
-  <img src="docs/screenshots/more.jpeg" width="23%" alt="More features">
+  <img src="docs/screenshots/home.jpeg" width="18%" alt="Home: battery, volume and noise control">&nbsp;
+  <img src="docs/screenshots/sound.jpeg" width="18%" alt="Sound: equalizer and balance">&nbsp;
+  <img src="docs/screenshots/gestures.jpeg" width="18%" alt="Gestures and lights">&nbsp;
+  <img src="docs/screenshots/more.jpeg" width="18%" alt="More features">&nbsp;
+  <img src="docs/screenshots/widgets.png" width="18%" alt="Home Screen widgets">
 </p>
-<p align="center"><sub>Home · Sound · Gestures &amp; lights · More features</sub></p>
+<p align="center"><sub>Home · Sound · Gestures &amp; lights · More features · Widgets</sub></p>
 
 > **Unofficial project.** Not affiliated with, endorsed by or sponsored by Samsung. *Samsung* and *Galaxy Buds* are trademarks of Samsung Electronics.
 

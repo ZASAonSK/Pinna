@@ -134,7 +134,7 @@ final class BudsController: NSObject, ObservableObject {
             self?.resume()
         })
         observers.append(nc.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { [weak self] _ in
-            self?.central.stopScan()
+            self?.backgroundScan()
         })
     }
 
@@ -301,6 +301,15 @@ final class BudsController: NSObject, ObservableObject {
         connectIssued = Date()
         central.connect(p, options: connectOptions)
         startAlternates(except: p.identifier)
+    }
+
+    /// In the background iOS only reports advertisements for listed services.
+    /// The other earbud announces LE Audio (`184E`) only now and then, so keep
+    /// listening for it while we are not connected.
+    private func backgroundScan() {
+        central.stopScan()
+        guard central.state == .poweredOn, state != .ready else { return }
+        central.scanForPeripherals(withServices: [CBUUID(string: "184E")], options: nil)
     }
 
     private func startScan() {
@@ -497,6 +506,7 @@ extension BudsController: CBCentralManagerDelegate {
             connectIssued = Date()
             central.connect(p, options: connectOptions)
             startAlternates(except: p.identifier)
+            if UIApplication.shared.applicationState == .background { backgroundScan() }
         } else {
             peripheral = nil
         }
@@ -523,6 +533,7 @@ extension BudsController: CBPeripheralDelegate {
                 rememberIdentity(p.identifier)
                 state = .ready
                 note("Control ready")
+                if UIApplication.shared.applicationState == .background { central.stopScan() }
             case (Self.batteryService, Self.batteryLevel):
                 p.discoverDescriptors(for: c)
                 p.readValue(for: c)

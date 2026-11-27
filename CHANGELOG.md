@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2
+
+- The left earbud announces itself only now and then. While not connected, Pinna now keeps listening for it in the background too (LE Audio announcement `184E`), so it learns and connects to it even when the app isn't open. Listening stops as soon as the earbuds are connected. (1.7.1 was published without this change by mistake.)
+
 ## 1.7.0
 
 - **Connects with only the left earbud.** In LE Audio each earbud is a separate Bluetooth LE device: the right one was the identity Pinna knew, the left one has its own (found with a debug build – same name, Samsung data path in its broadcast). Pinna now recognises the other earbud when it advertises, remembers it and waits for both at once, so either earbud alone can connect. The first time, give the left earbud a minute or two to show up.

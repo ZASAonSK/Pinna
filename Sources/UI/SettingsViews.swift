@@ -80,18 +80,22 @@ struct RowDivider: View {
 
 // MARK: - Sound
 
+/// Equalizer presets in the order of the `0x86` payload; custom is index 6.
+enum EqualizerPresets {
+    static func list(for model: BudsModel) -> [(String, String)] {
+        [
+            (L("Normal"), "equal"), (L("Bass boost"), "speaker.wave.3"), (L("Soft"), "leaf"),
+            (L("Dynamic"), "bolt"), (L("Clear"), "sparkle"), (L("Treble boost"), "arrow.up.right"),
+        ] + (model.has(.customEqualizer) ? [(L("Custom"), "slider.horizontal.3")] : [])
+    }
+}
+
 struct SoundView: View {
     @EnvironmentObject private var buds: BudsController
     @EnvironmentObject private var store: SettingsStore
     @State private var balance: Double = 16
 
-    private let basePresets: [(String, String)] = [
-        (L("Normal"), "equal"), (L("Bass boost"), "speaker.wave.3"), (L("Soft"), "leaf"),
-        (L("Dynamic"), "bolt"), (L("Clear"), "sparkle"), (L("Treble boost"), "arrow.up.right"),
-    ]
-    private var presets: [(String, String)] {
-        basePresets + (buds.model.has(.customEqualizer) ? [(L("Custom"), "slider.horizontal.3")] : [])
-    }
+    private var presets: [(String, String)] { EqualizerPresets.list(for: buds.model) }
 
     var body: some View {
         SettingsPage(title: L("Sound")) {

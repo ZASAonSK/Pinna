@@ -194,3 +194,9 @@
 "Battery & noise control" = "バッテリーとノイズコントロール";
 "Switches noise cancelling on or off." = "ノイズキャンセリングをオン/オフします。";
 "Sets this noise mode." = "このノイズモードに設定します。";
+"Quick toggles" = "クイック切り替え";
+"Edit Home" = "ホームを編集";
+"On Home" = "ホームに表示";
+"More cards" = "その他のカード";
+"Done" = "完了";
+"Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "ドラッグで並べ替え、– をタップで非表示にします。イヤホンにない機能のカードは表示されません。";

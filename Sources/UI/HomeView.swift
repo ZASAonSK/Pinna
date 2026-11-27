@@ -3,7 +3,9 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var buds: BudsController
     @EnvironmentObject private var store: SettingsStore
+    @ObservedObject private var layout = HomeLayout.shared
     @State private var showPicker = false
+    @State private var showEditor = false
 
     var body: some View {
         NavigationStack {
@@ -13,11 +15,15 @@ struct HomeView: View {
                     VStack(spacing: 18) {
                         HeaderView(showPicker: $showPicker)
                         if buds.state != .ready { ConnectionBanner(showPicker: $showPicker) }
-                        BatteryCard()
-                        if buds.volume != nil { VolumeCard() }
-                        if buds.model.noiseModes.count > 1 { NoiseControlCard() }
-                        QuickTiles()
-                        MenuLinks()
+                        ForEach(layout.visible) { card in
+                            HomeCardView(card: card)
+                        }
+                        Button { showEditor = true } label: {
+                            Label(L("Edit Home"), systemImage: "square.and.pencil")
+                                .font(.subheadline.weight(.medium))
+                        }
+                        .glassButton()
+                        .padding(.top, 4)
                         Text(L("Pinna is not a Samsung product. Galaxy Buds is a trademark of Samsung Electronics."))
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
@@ -26,11 +32,13 @@ struct HomeView: View {
                     }
                     .padding(.horizontal, 18)
                     .padding(.bottom, 30)
+                    .animation(Motion.smooth, value: layout.visible)
                 }
                 .scrollIndicators(.hidden)
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showPicker) { DevicePickerView() }
+            .sheet(isPresented: $showEditor) { HomeEditorView() }
             .task {
                 // First run: if nothing was found automatically, offer the picker.
                 guard !buds.hasKnownDevice else { return }
@@ -38,6 +46,59 @@ struct HomeView: View {
                 if buds.state != .ready && buds.state != .connecting { showPicker = true }
             }
         }
+    }
+}
+
+// MARK: - Cards
+
+/// One card of the editable Home screen. Cards for features the connected
+/// model lacks render nothing.
+private struct HomeCardView: View {
+    let card: HomeCard
+    @EnvironmentObject private var buds: BudsController
+
+    var body: some View {
+        switch card {
+        case .battery: BatteryCard()
+        case .volume: if buds.volume != nil { VolumeCard() }
+        case .noise: if buds.model.noiseModes.count > 1 { NoiseControlCard() }
+        case .equalizer: if buds.model.has(.equalizer) { EqualizerCard() }
+        case .tiles: QuickTiles()
+        case .menu: MenuLinks()
+        }
+    }
+}
+
+private struct EqualizerCard: View {
+    @EnvironmentObject private var buds: BudsController
+    @EnvironmentObject private var store: SettingsStore
+
+    var body: some View {
+        let presets = EqualizerPresets.list(for: buds.model)
+        VStack(alignment: .leading, spacing: 14) {
+            SectionTitle(text: L("Equalizer"), symbol: "slider.vertical.3")
+            ScrollView(.horizontal) {
+                HStack(spacing: 8) {
+                    ForEach(presets.indices, id: \.self) { i in
+                        let selected = store.values.equalizer == i
+                        Button { store.setEqualizer(i) } label: {
+                            Label(presets[i].0, systemImage: presets[i].1)
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .foregroundStyle(selected ? .white : .primary)
+                                .background(Capsule().fill(selected ? AnyShapeStyle(Palette.gradient) : AnyShapeStyle(.primary.opacity(0.06))))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .scrollIndicators(.hidden)
+            .animation(Motion.smooth, value: store.values.equalizer)
+        }
+        .padding(18)
+        .glassCard()
+        .disabled(!buds.canControl)
     }
 }
 

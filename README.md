@@ -36,6 +36,7 @@
 - **Widgets** — battery on the Home Screen and Lock Screen, noise-control buttons, and a combined battery + noise widget.
 - **Control Center (iOS 18)** — a Noise cancelling toggle with live state plus Ambient, Off and Adaptive buttons.
 - **Action button, Siri & Shortcuts** — "Toggle noise cancelling" and "Set noise control" actions that work without opening the app.
+- **Editable Home screen** — reorder, hide and add cards (battery, volume, noise control, equalizer, quick toggles).
 - **Live battery** for the left and right earbud and the case.
 - **Live volume** — changes when you swipe on an earbud, and can be set from the app.
 - **Finds your earbuds automatically**, even if you renamed them.

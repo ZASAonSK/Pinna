@@ -194,3 +194,9 @@
 "Battery & noise control" = "배터리 및 소음 제어";
 "Switches noise cancelling on or off." = "노이즈 캔슬링을 켜거나 끕니다.";
 "Sets this noise mode." = "이 소음 모드로 설정합니다.";
+"Quick toggles" = "빠른 설정";
+"Edit Home" = "홈 편집";
+"On Home" = "홈에 표시";
+"More cards" = "더 많은 카드";
+"Done" = "완료";
+"Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "드래그하여 순서를 바꾸고 –를 탭하여 숨깁니다. 이어버드에 없는 기능의 카드는 표시되지 않습니다.";

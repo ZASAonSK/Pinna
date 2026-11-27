@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0
+
+- **Editable Home screen.** Tap **Edit Home** at the bottom of the Home screen to reorder the cards, hide the ones you don't use and add others. New optional card: **Equalizer** with the presets one tap away. The settings menu always stays so the other screens remain reachable; **Reset** brings back the default layout.
+
 ## 1.7.2
 
 - The left earbud announces itself only now and then. While not connected, Pinna now keeps listening for it in the background too (LE Audio announcement `184E`), so it learns and connects to it even when the app isn't open. Listening stops as soon as the earbuds are connected. (1.7.1 was published without this change by mistake.)

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.1
+
+- Connecting with a single earbud: a pending connection is no longer cancelled and restarted every 30 seconds – a single earbud answers rarely and the restarts kept missing it. The attempt now runs uninterrupted and is renewed only after 150 seconds (or when Bluetooth or the earbuds' connection to the phone changes).
+- If the left and right earbud turn out to have separate Bluetooth identities, Pinna remembers each one that ever connected and waits for all of them at once, using whichever answers first.
+- The diagnostics log shows a short device ID with every connect and disconnect (e.g. `Sluchovody [9FD1]`).
+
 ## 1.6.0
 
 - **Widgets**: Battery (Home Screen and Lock Screen – circular, rectangular and inline), Noise control (small and medium, with mode buttons on iOS 17+) and Battery & noise control (medium and large).

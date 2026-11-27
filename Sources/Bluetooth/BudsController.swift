@@ -105,6 +105,11 @@ final class BudsController: NSObject, ObservableObject {
     private var observers: [NSObjectProtocol] = []
     private var token: Data? = UserDefaults.standard.data(forKey: "pinna.adv.token")
     private var knownID: UUID? = UserDefaults.standard.string(forKey: "pinna.peripheral").flatMap(UUID.init)
+    /// Every identity that has shown the Samsung data path (the left and right
+    /// earbud may each have their own); all of them are waited for at once.
+    private var knownIDs: Set<UUID> = Set((UserDefaults.standard.stringArray(forKey: "pinna.peripherals") ?? []).compactMap(UUID.init))
+    /// Pending connects to the other known identities.
+    private var alternates: [CBPeripheral] = []
     /// When the current connect attempt was (re)issued.
     private var connectIssued: Date?
     /// No special options: CBConnectPeripheralOptionEnableAutoReconnect made
@@ -178,7 +183,9 @@ final class BudsController: NSObject, ObservableObject {
     /// Forget the remembered buds (e.g. when switching to another pair).
     func forget() {
         if let p = peripheral { central.cancelPeripheralConnection(p) }
-        peripheral = nil; rx = nil; token = nil; knownID = nil
+        cancelAlternates()
+        peripheral = nil; rx = nil; token = nil; knownID = nil; knownIDs = []
+        UserDefaults.standard.removeObject(forKey: "pinna.peripherals")
         for key in ["pinna.adv.token", "pinna.peripheral", "pinna.name", "pinna.model"] { UserDefaults.standard.removeObject(forKey: key) }
         deviceName = nil; modelNumber = nil; model = .unknown; firmware = nil; volume = nil
         battery = BatteryLevels(); advBattery = BatteryLevels(); gattBattery = [:]
@@ -228,10 +235,12 @@ final class BudsController: NSObject, ObservableObject {
             if self.peripheral == nil {
                 self.findConnectedBuds()
             } else if self.state == .connecting, self.peripheral?.state != .connected,
-                      let issued = self.connectIssued, Date().timeIntervalSince(issued) > 30 {
+                      let issued = self.connectIssued, Date().timeIntervalSince(issued) > 150 {
                 // After Bluetooth is toggled or the case is reopened a pending
                 // connect can go stale; issue a fresh one.
-                self.reissueConnect(reason: "still connecting after 30 s")
+                // Only a rare safety net: a single earbud answers seldom, and
+                // cancelling every 30 s kept missing it (log 1.6.0, right bud only).
+                self.reissueConnect(reason: "still connecting after 150 s")
             }
         }
         watchConnectionEvents()
@@ -240,8 +249,39 @@ final class BudsController: NSObject, ObservableObject {
     /// iOS reports when the buds connect to the phone (e.g. audio after the
     /// case is opened); that is the moment to bring up our LE link too.
     private func watchConnectionEvents() {
-        guard let id = knownID else { return }
-        central.registerForConnectionEvents(options: [.peripheralUUIDs: [id]])
+        let ids = Array(knownIDs.union(knownID.map { [$0] } ?? []))
+        guard !ids.isEmpty else { return }
+        central.registerForConnectionEvents(options: [.peripheralUUIDs: ids])
+    }
+
+    /// Short identity tag for the log, e.g. "Sluchovody [9FD1]".
+    private func tag(_ p: CBPeripheral) -> String {
+        "\(p.name ?? "?") [\(p.identifier.uuidString.prefix(4))]"
+    }
+
+    /// Also wait for every other known identity; whichever answers first wins.
+    private func startAlternates(except id: UUID) {
+        cancelAlternates()
+        for other in knownIDs where other != id {
+            guard let p = central.retrievePeripherals(withIdentifiers: [other]).first else { continue }
+            p.delegate = self
+            alternates.append(p)
+            central.connect(p, options: connectOptions)
+            note("Also waiting for \(tag(p))")
+        }
+    }
+
+    private func cancelAlternates() {
+        for p in alternates where p.state != .connected { central.cancelPeripheralConnection(p) }
+        alternates.removeAll()
+    }
+
+    private func rememberIdentity(_ id: UUID) {
+        guard !knownIDs.contains(id) else { return }
+        knownIDs.insert(id)
+        UserDefaults.standard.set(knownIDs.map(\.uuidString), forKey: "pinna.peripherals")
+        note("Known earbud identities: \(knownIDs.count)")
+        watchConnectionEvents()
     }
 
     /// Cancel the pending attempt and start a new one on a fresh handle.
@@ -260,6 +300,7 @@ final class BudsController: NSObject, ObservableObject {
         state = .connecting
         connectIssued = Date()
         central.connect(p, options: connectOptions)
+        startAlternates(except: p.identifier)
     }
 
     private func startScan() {
@@ -289,8 +330,9 @@ final class BudsController: NSObject, ObservableObject {
         p.delegate = self
         state = .connecting
         connectIssued = Date()
-        note("Connecting to \(p.name ?? p.identifier.uuidString)")
+        note("Connecting to \(tag(p))")
         central.connect(p, options: connectOptions)
+        startAlternates(except: p.identifier)
     }
 
     private func upsertNearby(id: UUID, name: String, rssi: Int, connected: Bool, audioHint: Bool = false) {
@@ -329,7 +371,7 @@ extension BudsController: CBCentralManagerDelegate {
         peripheral = p
         p.delegate = self
         state = .connecting
-        note("Restored link to \(p.name ?? "earbuds") (\(p.state == .connected ? "connected" : "pending"))")
+        note("Restored link to \(tag(p)) (\(p.state == .connected ? "connected" : "pending"))")
     }
 
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
@@ -385,7 +427,14 @@ extension BudsController: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect p: CBPeripheral) {
-        guard p.identifier == peripheral?.identifier else { return }
+        let isAlternate = p.identifier != peripheral?.identifier && alternates.contains { $0.identifier == p.identifier }
+        guard p.identifier == peripheral?.identifier || isAlternate else { return }
+        if isAlternate {
+            // The other earbud answered first: use it and drop the main attempt.
+            if let old = peripheral, old.state != .connected { central.cancelPeripheralConnection(old) }
+            alternates.removeAll { $0.identifier == p.identifier }
+        }
+        cancelAlternates()
         peripheral = p
         p.delegate = self
         connectIssued = nil
@@ -396,7 +445,7 @@ extension BudsController: CBCentralManagerDelegate {
             deviceName = name
             UserDefaults.standard.set(name, forKey: "pinna.name")
         }
-        note("Connected to \(p.name ?? "?")")
+        note("Connected to \(tag(p))")
         rx = nil; batteryRoles.removeAll(); gattBattery.removeAll()
         p.discoverServices([Self.dataPathService, Self.batteryService, Self.deviceInfo, Self.volumeService])
     }
@@ -404,7 +453,7 @@ extension BudsController: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, connectionEventDidOccur event: CBConnectionEvent, for p: CBPeripheral) {
         // iOS also reports our own LE link here, so this must never cancel
         // anything; it only starts a connect when none is pending.
-        guard event == .peerConnected, p.identifier == knownID, peripheral == nil else { return }
+        guard event == .peerConnected, p.identifier == knownID || knownIDs.contains(p.identifier), peripheral == nil else { return }
         note("Earbuds connected to the phone")
         connect(p)
     }
@@ -419,7 +468,7 @@ extension BudsController: CBCentralManagerDelegate {
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral p: CBPeripheral, error: Error?) {
         guard p.identifier == peripheral?.identifier else { return }
-        note("Disconnected\(error.map { ": \($0.localizedDescription)" } ?? "")")
+        note("Disconnected \(tag(p))\(error.map { ": \($0.localizedDescription)" } ?? "")")
         rx = nil; volumeControl = nil; volume = nil; gattBattery.removeAll()
         publishBattery()
         if central.state == .poweredOn {
@@ -427,6 +476,7 @@ extension BudsController: CBCentralManagerDelegate {
             state = .connecting
             connectIssued = Date()
             central.connect(p, options: connectOptions)
+            startAlternates(except: p.identifier)
         } else {
             peripheral = nil
         }
@@ -450,6 +500,7 @@ extension BudsController: CBPeripheralDelegate {
             switch (s.uuid, c.uuid) {
             case (Self.dataPathService, Self.dataPathRX):
                 rx = c
+                rememberIdentity(p.identifier)
                 state = .ready
                 note("Control ready")
             case (Self.batteryService, Self.batteryLevel):

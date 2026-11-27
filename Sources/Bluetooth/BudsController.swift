@@ -404,7 +404,27 @@ extension BudsController: CBCentralManagerDelegate {
             let m = [UInt8](manufacturer ?? Data())
             let hint = m.count >= 3 && ((m[0] == 0x75 && m[1] == 0x00) || (m[0] == 0x06 && m[1] == 0x00 && m[2] == 0x03))
             upsertNearby(id: p.identifier, name: name, rssi: rssi.intValue, connected: false, audioHint: hint)
-            if peripheral == nil, p.identifier == knownID { connect(p) }
+            // In LE Audio each earbud is its own LE device with its own identity
+            // but the same name; the other earbud advertises the Samsung data
+            // path in its service data (measured: [8E49] next to [9FD1]).
+            let serviceData = (a[CBAdvertisementDataServiceDataKey] as? [CBUUID: Data]) ?? [:]
+            if serviceData[Self.dataPathService] != nil, !knownIDs.contains(p.identifier),
+               let ours = deviceName, name == ours {
+                note("Found the other earbud \(tag(p))")
+                rememberIdentity(p.identifier)
+            }
+            if knownIDs.contains(p.identifier) || p.identifier == knownID {
+                if peripheral == nil {
+                    connect(p)
+                } else if state != .ready, p.identifier != peripheral?.identifier,
+                          !alternates.contains(where: { $0.identifier == p.identifier }) {
+                    // It is advertising right now: wait for it next to the main attempt.
+                    p.delegate = self
+                    alternates.append(p)
+                    central.connect(p, options: connectOptions)
+                    note("Also waiting for \(tag(p))")
+                }
+            }
         }
         guard let data = manufacturer, AdvertisementDecoder.isBudsFrame(data) else { return }
         let tokens = token.map { [$0] } ?? []

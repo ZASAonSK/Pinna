@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0
+
+- **Connects with only the left earbud.** In LE Audio each earbud is a separate Bluetooth LE device: the right one was the identity Pinna knew, the left one has its own (found with a debug build – same name, Samsung data path in its broadcast). Pinna now recognises the other earbud when it advertises, remembers it and waits for both at once, so either earbud alone can connect. The first time, give the left earbud a minute or two to show up.
+
 ## 1.6.1
 
 - Connecting with a single earbud: a pending connection is no longer cancelled and restarted every 30 seconds – a single earbud answers rarely and the restarts kept missing it. The attempt now runs uninterrupted and is renewed only after 150 seconds (or when Bluetooth or the earbuds' connection to the phone changes).

@@ -17,6 +17,16 @@ Samsung's advertisement (company ID `0x0075`) carries the battery of both
 earbuds and the case and the model/colour ID (big-endian at offset 14, e.g.
 `0x0154` = Buds3 Pro). It does **not** change with noise mode or in-ear state.
 
+## Two earbuds, two LE identities
+
+With LE Audio each earbud is its own Bluetooth LE device (Coordinated Set,
+service `1846`). Both have the same name and both expose the Samsung data
+path. On SM-R630 the identity iOS bonds with is the right earbud; the left one
+only advertises now and then, connectable, with LE Audio services
+(`184E`, `184F`, `1850`, `1844`, `184D`) and service data
+`A7A473E9… = 01 54 …` (`0x0154` = Buds3 Pro). Pinna remembers every identity
+with the data path and waits for all of them, so either earbud alone works.
+
 ## Message frame
 
 ```

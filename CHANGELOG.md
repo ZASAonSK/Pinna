@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.4
+
+- Fixes the layout broken in 1.9.3: content reached past the edges of the screen on every iPhone, because the larger background glow stretched the screens. The background no longer affects the layout at all.
+
 ## 1.9.3
 
 - More speed-ups, mainly for older iPhones:

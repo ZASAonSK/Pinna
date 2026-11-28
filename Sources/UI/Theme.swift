@@ -72,15 +72,20 @@ struct AppBackground: View {
     @State private var phase = false
 
     var body: some View {
-        ZStack {
-            (scheme == .dark ? Color.black : Color(white: 0.96)).ignoresSafeArea()
-            // Radial gradients instead of blur(radius: 90): the same soft glow without a costly blur pass.
-            glow(Palette.indigo.opacity(scheme == .dark ? 0.55 : 0.35), size: 600)
-                .offset(x: phase ? -120 : -60, y: phase ? -260 : -200)
-            glow(Palette.teal.opacity(scheme == .dark ? 0.45 : 0.30), size: 560)
-                .offset(x: phase ? 140 : 90, y: phase ? 120 : 220)
-        }
-        .ignoresSafeArea()
+        // The glows sit in an overlay so their size never affects layout: as ZStack children
+        // wider than the screen they stretched every screen past its edges (1.9.3).
+        (scheme == .dark ? Color.black : Color(white: 0.96))
+            .overlay {
+                ZStack {
+                    // Radial gradients instead of blur(radius: 90): the same soft glow without a costly blur pass.
+                    glow(Palette.indigo.opacity(scheme == .dark ? 0.55 : 0.35), size: 600)
+                        .offset(x: phase ? -120 : -60, y: phase ? -260 : -200)
+                    glow(Palette.teal.opacity(scheme == .dark ? 0.45 : 0.30), size: 560)
+                        .offset(x: phase ? 140 : 90, y: phase ? 120 : 220)
+                }
+            }
+            .clipped()
+            .ignoresSafeArea()
         .onAppear {
             // A moving backdrop makes every frosted card re-blur each frame: unusable on iOS 16 devices (iPhone X, 1.9.1).
             guard #available(iOS 17.0, *), !reduceMotion else { return }

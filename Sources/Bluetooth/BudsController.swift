@@ -101,6 +101,12 @@ final class BudsController: NSObject, ObservableObject {
     private var batteryRoles: [ObjectIdentifier: Int] = [:]  // 0x010D left, 0x010E right, 0x0110 case
     private var gattBattery: [Int: Int] = [:]
     private var advBattery = BatteryLevels()
+    /// Per source and role ("adv"/"gatt" + 0x010D/0x010E/0x0110): last value and
+    /// when it last changed. The newest change wins: an earbud out of the case
+    /// keeps reporting the case level it saw last (43 % while the open case,
+    /// via the other earbud's broadcast, already said more; 1.8.2).
+    private var lastRaw: [String: Int] = [:]
+    private var changedAt: [String: Date] = [:]
     private var retryTimer: Timer?
     private var observers: [NSObjectProtocol] = []
     private var token: Data? = UserDefaults.standard.data(forKey: "pinna.adv.token")
@@ -188,7 +194,7 @@ final class BudsController: NSObject, ObservableObject {
         UserDefaults.standard.removeObject(forKey: "pinna.peripherals")
         for key in ["pinna.adv.token", "pinna.peripheral", "pinna.name", "pinna.model"] { UserDefaults.standard.removeObject(forKey: key) }
         deviceName = nil; modelNumber = nil; model = .unknown; firmware = nil; volume = nil
-        battery = BatteryLevels(); advBattery = BatteryLevels(); gattBattery = [:]
+        battery = BatteryLevels(); advBattery = BatteryLevels(); gattBattery = [:]; lastRaw = [:]; changedAt = [:]
         state = .searching
         resume()
     }
@@ -370,11 +376,23 @@ final class BudsController: NSObject, ObservableObject {
         if nearby.count > 40 { nearby.removeLast(nearby.count - 40) }
     }
 
+    /// Remembers when a source's value for a role really changed (re-reads of the same value don't count).
+    private func stamp(_ source: String, _ role: Int, _ value: Int?) {
+        guard let value else { return }
+        let key = "\(source)\(role)"
+        if lastRaw[key] != value { lastRaw[key] = value; changedAt[key] = Date() }
+    }
+
     private func publishBattery() {
+        func pick(_ role: Int, _ adv: Int?) -> Int? {
+            guard let g = gattBattery[role] else { return adv }
+            guard let a = adv else { return g }
+            return (changedAt["adv\(role)"] ?? .distantPast) > (changedAt["gatt\(role)"] ?? .distantPast) ? a : g
+        }
         var merged = advBattery
-        if let l = gattBattery[0x010D] { merged.left = l }
-        if let r = gattBattery[0x010E] { merged.right = r }
-        if let c = gattBattery[0x0110] { merged.caseLevel = c }
+        merged.left = pick(0x010D, advBattery.left)
+        merged.right = pick(0x010E, advBattery.right)
+        merged.caseLevel = pick(0x0110, advBattery.caseLevel)
         if !gattBattery.isEmpty { merged.updated = Date() }
         if merged != battery {
             if (merged.left, merged.right, merged.caseLevel) != (battery.left, battery.right, battery.caseLevel) {
@@ -460,6 +478,7 @@ extension BudsController: CBCentralManagerDelegate {
             UserDefaults.standard.set(t, forKey: "pinna.adv.token")
         }
         guard decoded.token == nil || decoded.token == token else { return }
+        stamp("adv", 0x010D, decoded.a); stamp("adv", 0x010E, decoded.b); stamp("adv", 0x0110, decoded.caseLevel)
         var b = advBattery
         if let v = decoded.a { b.left = v }
         if let v = decoded.b { b.right = v }
@@ -579,7 +598,7 @@ extension BudsController: CBPeripheralDelegate {
         let b = [UInt8](data)
         let role = Int(b[5]) | (Int(b[6]) << 8)
         batteryRoles[ObjectIdentifier(c)] = role
-        if let v = c.value?.first, v <= 100 { gattBattery[role] = Int(v) }
+        if let v = c.value?.first, v <= 100 { gattBattery[role] = Int(v); stamp("gatt", role, Int(v)) }
         publishBattery()
     }
 
@@ -589,6 +608,7 @@ extension BudsController: CBPeripheralDelegate {
         case Self.batteryLevel:
             if let role = batteryRoles[ObjectIdentifier(c)], let v = data.first, v <= 100 {
                 gattBattery[role] = Int(v)
+                stamp("gatt", role, Int(v))
                 publishBattery()
             }
         case Self.modelNumber:

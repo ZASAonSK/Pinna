@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.3
+
+- Case battery updates when you open the case: an earbud out of the case keeps reporting the case level it saw last, which used to override the fresh value broadcast from inside the open case. Pinna now uses whichever value changed most recently, for the case and both earbuds.
+
 ## 1.8.2
 
 - Battery no longer gets stuck: the earbuds don't always report changes on their own, so Pinna now reads the battery when you open it and every few seconds while it is open, and widgets follow. The diagnostics log shows each battery change.

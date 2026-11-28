@@ -158,16 +158,15 @@ struct BatteryWidgetView: View {
     var body: some View {
         switch family {
         case .accessoryInline:
-            Text("L \(text(entry.snapshot.left)) · R \(text(entry.snapshot.right)) · \(L("Case")) \(text(entry.snapshot.caseLevel))")
+            Text("\(L("L")) \(text(entry.snapshot.left)) · \(L("R")) \(text(entry.snapshot.right)) · \(L("Case")) \(text(entry.snapshot.caseLevel))")
         case .accessoryCircular:
-            let low = [entry.snapshot.left, entry.snapshot.right].compactMap { $0 }.min()
-            Gauge(value: Double(low ?? 0), in: 0...100) {
-                Image(systemName: "earbuds")
-            } currentValueLabel: {
-                Text(low.map { "\($0)" } ?? "–")
+            ZStack {
+                AccessoryWidgetBackground()
+                VStack(spacing: 0) {
+                    side(L("L"), entry.snapshot.left)
+                    side(L("R"), entry.snapshot.right)
+                }
             }
-            .gaugeStyle(.accessoryCircular)
-            .widgetAccentable()
             .lockScreenBackground()
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 2) {
@@ -186,8 +185,8 @@ struct BatteryWidgetView: View {
                 .foregroundStyle(.white)
                 if entry.hasData {
                     HStack(spacing: 6) {
-                        Ring(level: entry.snapshot.left, label: "L", size: 38)
-                        Ring(level: entry.snapshot.right, label: "R", size: 38)
+                        Ring(level: entry.snapshot.left, label: L("L"), size: 38)
+                        Ring(level: entry.snapshot.right, label: L("R"), size: 38)
                     }
                     Ring(level: entry.snapshot.caseLevel, label: L("Case"), size: 30)
                 } else {
@@ -201,6 +200,16 @@ struct BatteryWidgetView: View {
     }
 
     private func text(_ v: Int?) -> String { v.map { "\($0)%" } ?? "–" }
+
+    /// One line of the circular Lock Screen widget, e.g. "Ľ 85".
+    private func side(_ label: String, _ level: Int?) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 3) {
+            Text(label).font(.system(size: 11, weight: .semibold)).opacity(0.7)
+            Text(level.map { "\($0)" } ?? "–").font(.system(size: 17, weight: .bold, design: .rounded))
+        }
+        .minimumScaleFactor(0.7)
+        .widgetAccentable()
+    }
 }
 
 extension View {

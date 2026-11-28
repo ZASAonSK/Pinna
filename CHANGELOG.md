@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1
+
+- The small round **Battery** widget on the Lock Screen now shows both earbuds, left and right, instead of only the lower one. The L/R letters follow your phone's language in all widgets (e.g. Ľ/P in Slovak, G/D in French).
+
 ## 1.8.0
 
 - **Editable Home screen.** Tap **Edit Home** at the bottom of the Home screen to reorder the cards, hide the ones you don't use and add others. New optional card: **Equalizer** with the presets one tap away. The settings menu always stays so the other screens remain reachable; **Reset** brings back the default layout.

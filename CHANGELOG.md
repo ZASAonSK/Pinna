@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.2
+
+- Fixes constant lag on older iPhones (iOS 16, e.g. iPhone X): the softly moving background made every frosted card redraw its blur 60 times a second. On iOS 16, and everywhere when *Reduce Motion* is on, the background and the status dot now stay still.
+
 ## 1.9.1
 
 - Smoother app, especially on older iPhones with iOS 16: Bluetooth broadcasts (dozens a second) no longer redraw the whole screen each time – only real changes do.

@@ -152,6 +152,7 @@ private struct HeaderView: View {
 
 struct StatusDot: View {
     let state: LinkState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulse = false
     var color: Color {
         switch state {
@@ -167,7 +168,7 @@ struct StatusDot: View {
             .frame(width: 8, height: 8)
             .overlay(Circle().stroke(color.opacity(0.5), lineWidth: 6).scaleEffect(pulse ? 1.6 : 0.6).opacity(pulse ? 0 : 1))
             .onAppear {
-                guard state != .ready else { return }
+                guard #available(iOS 17.0, *), state != .ready, !reduceMotion else { return }
                 withAnimation(.easeOut(duration: 1.4).repeatForever(autoreverses: false)) { pulse = true }
             }
     }

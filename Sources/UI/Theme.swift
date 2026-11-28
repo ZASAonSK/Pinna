@@ -68,6 +68,7 @@ enum Palette {
 /// Soft animated backdrop that gives the glass something to refract.
 struct AppBackground: View {
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var phase = false
 
     var body: some View {
@@ -86,6 +87,8 @@ struct AppBackground: View {
         }
         .ignoresSafeArea()
         .onAppear {
+            // A moving backdrop makes every frosted card re-blur each frame: unusable on iOS 16 devices (iPhone X, 1.9.1).
+            guard #available(iOS 17.0, *), !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 9).repeatForever(autoreverses: true)) { phase.toggle() }
         }
     }

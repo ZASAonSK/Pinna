@@ -14,10 +14,11 @@ enum AppInfo {
     static func issueURL(log: String) -> URL? {
         let lines = log.components(separatedBy: "\n")
         let excerpt = (lines.prefix(1) + lines.dropFirst().suffix(60)).joined(separator: "\n")
-        var c = URLComponents(string: "https://github.com/ZASAonSK/Pinna/issues/new")
-        c?.queryItems = [URLQueryItem(name: "body", value: "**What happened?**\n\n\n**Log**\n```\n\(excerpt)\n```\n")]
-        c?.percentEncodedQuery = c?.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
-        return c?.url
+        guard var c = URLComponents(string: "https://github.com/ZASAonSK/Pinna/issues/new") else { return nil }
+        c.queryItems = [URLQueryItem(name: "body", value: "**What happened?**\n\n\n**Log**\n```\n\(excerpt)\n```\n")]
+        let query = c.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        c.percentEncodedQuery = query
+        return c.url
     }
 }
 

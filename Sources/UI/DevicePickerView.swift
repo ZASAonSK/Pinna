@@ -60,7 +60,8 @@ struct DevicePickerView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("Close")) { dismiss() } }
             }
-            .onAppear { buds.refreshNearby() }
+            .onAppear { buds.trackNearby = true; buds.refreshNearby() }
+            .onDisappear { buds.trackNearby = false }
             .task {
                 while !Task.isCancelled {
                     try? await Task.sleep(nanoseconds: 3_000_000_000)

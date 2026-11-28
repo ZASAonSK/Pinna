@@ -74,15 +74,10 @@ struct AppBackground: View {
     var body: some View {
         ZStack {
             (scheme == .dark ? Color.black : Color(white: 0.96)).ignoresSafeArea()
-            Circle()
-                .fill(Palette.indigo.opacity(scheme == .dark ? 0.55 : 0.35))
-                .frame(width: 420, height: 420)
-                .blur(radius: 90)
+            // Radial gradients instead of blur(radius: 90): the same soft glow without a costly blur pass.
+            glow(Palette.indigo.opacity(scheme == .dark ? 0.55 : 0.35), size: 600)
                 .offset(x: phase ? -120 : -60, y: phase ? -260 : -200)
-            Circle()
-                .fill(Palette.teal.opacity(scheme == .dark ? 0.45 : 0.30))
-                .frame(width: 380, height: 380)
-                .blur(radius: 90)
+            glow(Palette.teal.opacity(scheme == .dark ? 0.45 : 0.30), size: 560)
                 .offset(x: phase ? 140 : 90, y: phase ? 120 : 220)
         }
         .ignoresSafeArea()
@@ -91,6 +86,12 @@ struct AppBackground: View {
             guard #available(iOS 17.0, *), !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 9).repeatForever(autoreverses: true)) { phase.toggle() }
         }
+    }
+
+    private func glow(_ color: Color, size: CGFloat) -> some View {
+        Circle()
+            .fill(RadialGradient(colors: [color, color.opacity(0)], center: .center, startRadius: 0, endRadius: size / 2))
+            .frame(width: size, height: size)
     }
 }
 
@@ -119,23 +120,39 @@ extension View {
             let base: Glass = tint.map { Glass.regular.tint($0) } ?? .regular
             self.glassEffect(interactive ? base.interactive() : base, in: .capsule)
         } else {
-            self.background(Capsule().fill(tint ?? Color.clear).background(.ultraThinMaterial, in: Capsule()))
-                .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+            capsuleFallback(tint: tint)
         }
         #else
-        self.background(Capsule().fill(tint ?? Color.clear).background(.ultraThinMaterial, in: Capsule()))
-            .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+        capsuleFallback(tint: tint)
         #endif
     }
 
+    @ViewBuilder
     private func materialCard(cornerRadius: CGFloat, tint: Color?) -> some View {
-        self.background {
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).fill((tint ?? .clear).opacity(0.18)))
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        if #available(iOS 17.0, *) {
+            self.background {
+                shape.fill(.ultraThinMaterial).overlay(shape.fill((tint ?? .clear).opacity(0.18)))
+            }
+            .overlay(shape.strokeBorder(.white.opacity(0.15), lineWidth: 0.5))
+            .shadow(color: .black.opacity(0.12), radius: 16, y: 8)
+        } else {
+            // iOS 16 devices (iPhone 8/X) can't afford a blur and a shadow per card while scrolling.
+            self.background { shape.fill(Color(.secondarySystemBackground)).overlay(shape.fill((tint ?? .clear).opacity(0.18))) }
+                .overlay(shape.strokeBorder(.white.opacity(0.15), lineWidth: 0.5))
         }
-        .overlay(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).strokeBorder(.white.opacity(0.15), lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.12), radius: 16, y: 8)
+    }
+
+    /// Capsule fallback below iOS 26: material on iOS 17+, solid on iOS 16 (see `materialCard`).
+    @ViewBuilder
+    fileprivate func capsuleFallback(tint: Color?) -> some View {
+        if #available(iOS 17.0, *) {
+            self.background(Capsule().fill(tint ?? Color.clear).background(.ultraThinMaterial, in: Capsule()))
+                .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+        } else {
+            self.background(Capsule().fill(tint ?? Color.clear).background(Color(.secondarySystemBackground), in: Capsule()))
+                .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 0.5))
+        }
     }
 
     /// Glass button style on iOS 26, bordered on older systems.

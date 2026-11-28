@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.3
+
+- More speed-ups, mainly for older iPhones:
+  - Nearby Bluetooth devices are tracked only while the device picker is open; before, every device around (dozens in a city) kept redrawing all screens.
+  - The background glow is drawn with gradients instead of a large blur – same look, a fraction of the work.
+  - On iOS 16 the cards are solid instead of frosted glass and have no shadow, so scrolling stays smooth on iPhone 8 and X. iOS 17 and later look the same as before.
+
 ## 1.9.2
 
 - Fixes constant lag on older iPhones (iOS 16, e.g. iPhone X): the softly moving background made every frosted card redraw its blur 60 times a second. On iOS 16, and everywhere when *Reduce Motion* is on, the background and the status dot now stay still.

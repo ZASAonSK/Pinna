@@ -94,6 +94,8 @@ final class BudsController: NSObject, ObservableObject {
     @Published private(set) var lastError: String?
 
     var canControl: Bool { state == .ready }
+    /// Collect `nearby` only while the device picker is open: every change re-renders all screens.
+    var trackNearby = false
     var currentDeviceID: UUID? { peripheral?.identifier }
     var hasKnownDevice: Bool { knownID != nil }
 
@@ -453,7 +455,7 @@ extension BudsController: CBCentralManagerDelegate {
             // Renamed buds still advertise Samsung (0x0075) or Swift Pair (0x0006, 03) data.
             let m = [UInt8](manufacturer ?? Data())
             let hint = m.count >= 3 && ((m[0] == 0x75 && m[1] == 0x00) || (m[0] == 0x06 && m[1] == 0x00 && m[2] == 0x03))
-            upsertNearby(id: p.identifier, name: name, rssi: rssi.intValue, connected: false, audioHint: hint)
+            if trackNearby { upsertNearby(id: p.identifier, name: name, rssi: rssi.intValue, connected: false, audioHint: hint) }
             // In LE Audio each earbud is its own LE device with its own identity
             // but the same name; the other earbud advertises the Samsung data
             // path in its service data (measured: [8E49] next to [9FD1]).

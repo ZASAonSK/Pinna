@@ -242,8 +242,19 @@ final class BudsController: NSObject, ObservableObject {
                 // cancelling every 30 s kept missing it (log 1.6.0, right bud only).
                 self.reissueConnect(reason: "still connecting after 150 s")
             }
+            if self.state == .ready { self.refreshBattery() }
         }
+        refreshBattery()
         watchConnectionEvents()
+    }
+
+    /// The buds don't reliably notify battery changes (stuck at 59 % while
+    /// really 52 %, 1.8.1), so re-read it on open and while the app is active.
+    private func refreshBattery() {
+        guard let p = peripheral, p.state == .connected else { return }
+        for s in p.services ?? [] where s.uuid == Self.batteryService {
+            for c in s.characteristics ?? [] where c.uuid == Self.batteryLevel { p.readValue(for: c) }
+        }
     }
 
     /// iOS reports when the buds connect to the phone (e.g. audio after the
@@ -365,7 +376,13 @@ final class BudsController: NSObject, ObservableObject {
         if let r = gattBattery[0x010E] { merged.right = r }
         if let c = gattBattery[0x0110] { merged.caseLevel = c }
         if !gattBattery.isEmpty { merged.updated = Date() }
-        if merged != battery { battery = merged }
+        if merged != battery {
+            if (merged.left, merged.right, merged.caseLevel) != (battery.left, battery.right, battery.caseLevel) {
+                let t = { (v: Int?) in v.map { "\($0)" } ?? "–" }
+                note("Battery L \(t(merged.left)) R \(t(merged.right)) case \(t(merged.caseLevel))")
+            }
+            battery = merged
+        }
     }
 }
 

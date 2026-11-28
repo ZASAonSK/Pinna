@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.2
+
+- Battery no longer gets stuck: the earbuds don't always report changes on their own, so Pinna now reads the battery when you open it and every few seconds while it is open, and widgets follow. The diagnostics log shows each battery change.
+
 ## 1.8.1
 
 - The small round **Battery** widget on the Lock Screen now shows both earbuds, left and right, instead of only the lower one. The L/R letters follow your phone's language in all widgets (e.g. Ľ/P in Slovak, G/D in French).

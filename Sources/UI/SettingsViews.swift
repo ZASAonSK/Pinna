@@ -54,6 +54,8 @@ struct ToggleRow: View {
     var subtitle: String? = nil
     let symbol: String
     let isOn: Bool
+    /// False for app settings that work without the earbuds.
+    var needsBuds = true
     let set: (Bool) -> Void
     @EnvironmentObject private var buds: BudsController
 
@@ -68,7 +70,7 @@ struct ToggleRow: View {
             }
         }
         .tint(Palette.accent)
-        .disabled(!buds.canControl)
+        .disabled(needsBuds && !buds.canControl)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
     }
@@ -325,6 +327,8 @@ private struct HoldPicker: View {
 struct MoreView: View {
     @EnvironmentObject private var buds: BudsController
     @EnvironmentObject private var store: SettingsStore
+    @AppStorage(LiveBattery.enabledKey) private var liveActivity = false
+    @AppStorage(BatteryAlerts.enabledKey) private var lowBatteryAlert = false
 
     var body: some View {
         let m = buds.model
@@ -375,6 +379,20 @@ struct MoreView: View {
                         ToggleRow(title: L("Neck stretch reminder"), subtitle: L("Reminds you when your head has been tilted down for a long time"),
                                   symbol: "figure.cooldown", isOn: store.values.neckStretch) { store.setNeckStretch($0) }
                     }
+                }
+            }
+            GlassSection(title: L("Battery"), symbol: "battery.75percent") {
+                ToggleRow(title: L("Battery on Lock Screen"),
+                          subtitle: L("Live Activity on the Lock Screen and in the Dynamic Island while the earbuds are connected"),
+                          symbol: "lock.iphone", isOn: liveActivity, needsBuds: false) { on in
+                    liveActivity = on
+                    buds.syncLiveActivity()
+                }
+                RowDivider()
+                ToggleRow(title: L("Low battery alert"), subtitle: L("Notifies you when an earbud is at 15 % or less"),
+                          symbol: "bell.badge", isOn: lowBatteryAlert, needsBuds: false) { on in
+                    lowBatteryAlert = on
+                    if on { Task { lowBatteryAlert = await BatteryAlerts.requestPermission() } }
                 }
             }
             GlassSection(title: L("Shortcuts & Control Center"), symbol: "switch.2") {

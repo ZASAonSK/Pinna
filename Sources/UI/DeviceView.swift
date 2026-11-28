@@ -118,6 +118,14 @@ struct DiagnosticsView: View {
                     Spacer()
                 }
                 .padding(12)
+                if let url = AppInfo.issueURL(log: buds.logText) {
+                    RowDivider()
+                    Link(destination: url) {
+                        Label(L("Report on GitHub"), systemImage: "ladybug")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(16)
+                }
                 RowDivider()
                 VStack(alignment: .leading, spacing: 4) {
                     if buds.log.isEmpty {

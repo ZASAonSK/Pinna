@@ -200,3 +200,9 @@
 "More cards" = "Autres cartes";
 "Done" = "OK";
 "Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "Faites glisser pour réorganiser, touchez – pour masquer. Les cartes des fonctions absentes de vos écouteurs ne sont pas affichées.";
+"Earbud battery low" = "Batterie de l’écouteur faible";
+"Report on GitHub" = "Signaler sur GitHub";
+"Battery on Lock Screen" = "Batterie sur l’écran verrouillé";
+"Live Activity on the Lock Screen and in the Dynamic Island while the earbuds are connected" = "Activité en direct sur l’écran verrouillé et dans la Dynamic Island lorsque les écouteurs sont connectés";
+"Low battery alert" = "Alerte batterie faible";
+"Notifies you when an earbud is at 15 % or less" = "Vous avertit lorsqu’un écouteur est à 15 % ou moins";

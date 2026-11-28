@@ -1,3 +1,4 @@
+import ActivityKit
 import AppIntents
 import SwiftUI
 import WidgetKit
@@ -10,6 +11,9 @@ struct PinnaWidgetBundle: WidgetBundle {
         BatteryWidget()
         NoiseWidget()
         BudsWidget()
+        if #available(iOS 16.2, *) {
+            BatteryLiveActivity()
+        }
         if #available(iOS 18.0, *) {
             NoiseCancellingControl()
             AmbientControl()
@@ -172,7 +176,7 @@ struct BatteryWidgetView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Label(entry.snapshot.deviceName ?? "Pinna", systemImage: "earbuds").font(.caption.weight(.semibold)).lineLimit(1)
                 Text("\(L("Left")) \(text(entry.snapshot.left)) · \(L("Right")) \(text(entry.snapshot.right))").font(.caption)
-                Text("\(L("Case")) \(text(entry.snapshot.caseLevel))").font(.caption)
+                (Text("\(L("Case")) \(text(entry.snapshot.caseLevel))") + age).font(.caption).lineLimit(1)
             }
             .lockScreenBackground()
         default:
@@ -181,6 +185,9 @@ struct BatteryWidgetView: View {
                     Image(systemName: "earbuds").font(.caption.weight(.bold))
                     Text(entry.snapshot.deviceName ?? "Pinna").font(.caption.weight(.semibold)).lineLimit(1)
                     Spacer(minLength: 0)
+                    if let updated = entry.snapshot.updated {
+                        Text(updated, style: .relative).font(.caption2).opacity(0.7).lineLimit(1)
+                    }
                 }
                 .foregroundStyle(.white)
                 if entry.hasData {
@@ -200,6 +207,12 @@ struct BatteryWidgetView: View {
     }
 
     private func text(_ v: Int?) -> String { v.map { "\($0)%" } ?? "–" }
+
+    /// " · 4 min" since the app last wrote new values; iOS keeps it ticking without a reload.
+    private var age: Text {
+        guard let updated = entry.snapshot.updated else { return Text("") }
+        return Text(" · ") + Text(updated, style: .relative)
+    }
 
     /// One line of the circular Lock Screen widget, e.g. "Ľ 85".
     private func side(_ label: String, _ level: Int?) -> some View {
@@ -310,6 +323,64 @@ struct BudsWidgetView: View {
             if family == .systemLarge { Spacer(minLength: 0) }
         }
         .widgetBackground()
+    }
+}
+
+// MARK: - Live Activity (Lock Screen + Dynamic Island)
+
+@available(iOS 16.2, *)
+struct BatteryLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: BatteryActivityAttributes.self) { context in
+            HStack(spacing: 12) {
+                Label(context.attributes.deviceName, systemImage: "earbuds")
+                    .font(.subheadline.weight(.semibold)).lineLimit(1)
+                Spacer(minLength: 0)
+                LiveLevel(label: L("L"), level: context.state.left)
+                LiveLevel(label: L("R"), level: context.state.right)
+                LiveLevel(label: L("Case"), level: context.state.caseLevel)
+            }
+            .padding(16)
+            .foregroundStyle(.white)
+            .opacity(context.isStale ? 0.55 : 1)
+            .activityBackgroundTint(WStyle.indigo.opacity(0.85))
+            .activitySystemActionForegroundColor(.white)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) { LiveLevel(label: L("L"), level: context.state.left) }
+                DynamicIslandExpandedRegion(.trailing) { LiveLevel(label: L("R"), level: context.state.right) }
+                DynamicIslandExpandedRegion(.center) {
+                    Label(context.attributes.deviceName, systemImage: "earbuds").font(.caption.weight(.semibold)).lineLimit(1)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    Text("\(L("Case")) \(LiveLevel.text(context.state.caseLevel))").font(.caption).opacity(0.8)
+                }
+            } compactLeading: {
+                Text("\(L("L")) \(LiveLevel.text(context.state.left))").font(.caption.weight(.semibold))
+                    .foregroundStyle(WStyle.battery(context.state.left))
+            } compactTrailing: {
+                Text("\(L("R")) \(LiveLevel.text(context.state.right))").font(.caption.weight(.semibold))
+                    .foregroundStyle(WStyle.battery(context.state.right))
+            } minimal: {
+                Image(systemName: "earbuds")
+            }
+        }
+    }
+}
+
+struct LiveLevel: View {
+    let label: String
+    let level: Int?
+
+    static func text(_ level: Int?) -> String { level.map { "\($0)%" } ?? "–" }
+
+    var body: some View {
+        VStack(spacing: 1) {
+            Text(Self.text(level)).font(.system(.title3, design: .rounded).weight(.bold))
+                .foregroundStyle(WStyle.battery(level))
+            Text(label).font(.caption2).opacity(0.75).lineLimit(1)
+        }
+        .frame(minWidth: 44)
     }
 }
 

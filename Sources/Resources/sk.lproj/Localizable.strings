@@ -200,3 +200,9 @@
 "More cards" = "Ďalšie karty";
 "Done" = "Hotovo";
 "Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "Poradie zmeníte potiahnutím, ťuknutím na – kartu skryjete. Karty funkcií, ktoré vaše slúchadlá nemajú, sa nezobrazia.";
+"Earbud battery low" = "Slabá batéria slúchadla";
+"Report on GitHub" = "Nahlásiť na GitHube";
+"Battery on Lock Screen" = "Batéria na zamknutej obrazovke";
+"Live Activity on the Lock Screen and in the Dynamic Island while the earbuds are connected" = "Živá aktivita na zamknutej obrazovke a v Dynamic Islande, kým sú slúchadlá pripojené";
+"Low battery alert" = "Upozornenie na slabú batériu";
+"Notifies you when an earbud is at 15 % or less" = "Upozorní vás, keď má slúchadlo 15 % alebo menej";

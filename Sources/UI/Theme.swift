@@ -8,6 +8,17 @@ enum AppInfo {
         let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
         return "\(v) (\(b))"
     }
+
+    /// New GitHub issue with the log filled in; the user reviews it before sending.
+    /// Only the header and the last lines fit: GitHub cuts off long URLs.
+    static func issueURL(log: String) -> URL? {
+        let lines = log.components(separatedBy: "\n")
+        let excerpt = (lines.prefix(1) + lines.dropFirst().suffix(60)).joined(separator: "\n")
+        var c = URLComponents(string: "https://github.com/ZASAonSK/Pinna/issues/new")
+        c?.queryItems = [URLQueryItem(name: "body", value: "**What happened?**\n\n\n**Log**\n```\n\(excerpt)\n```\n")]
+        c?.percentEncodedQuery = c?.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        return c?.url
+    }
 }
 
 /// Animations that match iOS 17's `.smooth` and fall back to a close

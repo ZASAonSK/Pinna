@@ -173,4 +173,36 @@ precondition(AdvertisementDecoder.modelColorID(frame) == 340)
 precondition(Set(BudsModel.all.map(\.id)).count == BudsModel.all.count)
 for m in BudsModel.all { precondition(m.noiseModes.first == .off) }
 
+// Battery merge: the newest change wins; re-reads of an old value don't count.
+let t0 = Date(timeIntervalSince1970: 0)
+var merge = BatteryMerge()
+merge.set(.gatt, BatteryMerge.caseRole, 43, now: t0)
+precondition(merge.value(BatteryMerge.caseRole) == 43)
+merge.set(.adv, BatteryMerge.caseRole, 60, now: t0 + 10)        // open case broadcasts fresh level
+precondition(merge.value(BatteryMerge.caseRole) == 60)
+merge.set(.gatt, BatteryMerge.caseRole, 43, now: t0 + 20)       // periodic re-read, unchanged
+precondition(merge.value(BatteryMerge.caseRole) == 60)
+merge.clear(.gatt)
+precondition(!merge.hasGATT)
+merge.set(.gatt, BatteryMerge.caseRole, 43, now: t0 + 30)       // reconnect, same stale value
+precondition(merge.value(BatteryMerge.caseRole) == 60)
+merge.set(.gatt, BatteryMerge.caseRole, 59, now: t0 + 40)       // real change
+precondition(merge.value(BatteryMerge.caseRole) == 59)
+merge.set(.gatt, BatteryMerge.left, 255, now: t0)               // unavailable
+precondition(merge.value(BatteryMerge.left) == nil)
+merge.set(.adv, BatteryMerge.right, 100, now: t0)
+precondition(merge.value(BatteryMerge.right) == 100 && merge.hasGATT)
+
+// Low battery: once at 15 %, not again until charged above 20 %.
+var watch = LowBatteryWatch()
+precondition(!watch.shouldAlert(BatteryMerge.left, 16))
+precondition(watch.shouldAlert(BatteryMerge.left, 15))
+precondition(!watch.shouldAlert(BatteryMerge.left, 14))
+precondition(!watch.shouldAlert(BatteryMerge.left, 18))
+precondition(!watch.shouldAlert(BatteryMerge.left, 15))
+precondition(watch.shouldAlert(BatteryMerge.right, 9))          // per earbud
+precondition(!watch.shouldAlert(BatteryMerge.left, 21))
+precondition(watch.shouldAlert(BatteryMerge.left, 15))
+precondition(!watch.shouldAlert(BatteryMerge.left, nil))
+
 print("Pinna protocol, model and advertisement tests passed")

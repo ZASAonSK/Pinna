@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.9.0
+
+- **Battery on the Lock Screen as a Live Activity** (iOS 16.2+): left, right and case on the Lock Screen and in the Dynamic Island, updated on every change even with the app closed – widgets only get refreshed by iOS about every 30 minutes. Turn it on under *More features → Battery*. iOS ends it after 8 hours; opening Pinna starts it again.
+- **Low battery alert**: a notification when an earbud is at 15 % or less, once per charge. Also under *More features → Battery*.
+- Widgets show how long ago the battery last changed.
+- *Diagnostics → Report on GitHub* opens a new issue with the log filled in, so you can check it before sending.
+
 ## 1.8.3
 
 - Case battery updates when you open the case: an earbud out of the case keeps reporting the case level it saw last, which used to override the fresh value broadcast from inside the open case. Pinna now uses whichever value changed most recently, for the case and both earbuds.

@@ -67,7 +67,11 @@ final class BudsController: NSObject, ObservableObject {
     static let volumeControlPoint = CBUUID(string: "2B7E") // [opcode, change counter, (volume)]
 
     @Published private(set) var state: LinkState = .searching {
-        didSet { if state != oldValue { WidgetSync.shared.update { $0.connected = state == .ready } } }
+        didSet {
+            guard state != oldValue else { return }
+            WidgetSync.shared.update { $0.connected = state == .ready }
+            syncLiveActivity()
+        }
     }
     @Published private(set) var deviceName: String? {
         didSet { if deviceName != oldValue { WidgetSync.shared.update { $0.deviceName = deviceName } } }
@@ -99,14 +103,9 @@ final class BudsController: NSObject, ObservableObject {
     private var volumeControl: CBCharacteristic?
     private var volumeCounter: UInt8 = 0
     private var batteryRoles: [ObjectIdentifier: Int] = [:]  // 0x010D left, 0x010E right, 0x0110 case
-    private var gattBattery: [Int: Int] = [:]
-    private var advBattery = BatteryLevels()
-    /// Per source and role ("adv"/"gatt" + 0x010D/0x010E/0x0110): last value and
-    /// when it last changed. The newest change wins: an earbud out of the case
-    /// keeps reporting the case level it saw last (43 % while the open case,
-    /// via the other earbud's broadcast, already said more; 1.8.2).
-    private var lastRaw: [String: Int] = [:]
-    private var changedAt: [String: Date] = [:]
+    private var merge = BatteryMerge()
+    private var advUpdated: Date?
+    private var lowBattery = LowBatteryWatch()
     private var retryTimer: Timer?
     private var observers: [NSObjectProtocol] = []
     private var token: Data? = UserDefaults.standard.data(forKey: "pinna.adv.token")
@@ -194,7 +193,7 @@ final class BudsController: NSObject, ObservableObject {
         UserDefaults.standard.removeObject(forKey: "pinna.peripherals")
         for key in ["pinna.adv.token", "pinna.peripheral", "pinna.name", "pinna.model"] { UserDefaults.standard.removeObject(forKey: key) }
         deviceName = nil; modelNumber = nil; model = .unknown; firmware = nil; volume = nil
-        battery = BatteryLevels(); advBattery = BatteryLevels(); gattBattery = [:]; lastRaw = [:]; changedAt = [:]
+        battery = BatteryLevels(); merge = BatteryMerge(); advUpdated = nil
         state = .searching
         resume()
     }
@@ -251,6 +250,7 @@ final class BudsController: NSObject, ObservableObject {
             if self.state == .ready { self.refreshBattery() }
         }
         refreshBattery()
+        syncLiveActivity()   // a Live Activity can only be started while the app is open
         watchConnectionEvents()
     }
 
@@ -376,31 +376,30 @@ final class BudsController: NSObject, ObservableObject {
         if nearby.count > 40 { nearby.removeLast(nearby.count - 40) }
     }
 
-    /// Remembers when a source's value for a role really changed (re-reads of the same value don't count).
-    private func stamp(_ source: String, _ role: Int, _ value: Int?) {
-        guard let value else { return }
-        let key = "\(source)\(role)"
-        if lastRaw[key] != value { lastRaw[key] = value; changedAt[key] = Date() }
+    private func publishBattery() {
+        let merged = BatteryLevels(left: merge.value(BatteryMerge.left), right: merge.value(BatteryMerge.right),
+                                   caseLevel: merge.value(BatteryMerge.caseRole),
+                                   updated: merge.hasGATT ? Date() : advUpdated)
+        guard merged != battery else { return }
+        let changed = (merged.left, merged.right, merged.caseLevel) != (battery.left, battery.right, battery.caseLevel)
+        battery = merged
+        guard changed else { return }
+        let t = { (v: Int?) in v.map { "\($0)" } ?? "–" }
+        note("Battery L \(t(merged.left)) R \(t(merged.right)) case \(t(merged.caseLevel))")
+        if UserDefaults.standard.bool(forKey: BatteryAlerts.enabledKey) {
+            for (role, side) in [(BatteryMerge.left, L("Left")), (BatteryMerge.right, L("Right"))]
+            where lowBattery.shouldAlert(role, merge.value(role)) {
+                BatteryAlerts.post(side: side, level: merge.value(role) ?? 0)
+                note("Low battery alert: \(side)")
+            }
+        }
+        syncLiveActivity()
     }
 
-    private func publishBattery() {
-        func pick(_ role: Int, _ adv: Int?) -> Int? {
-            guard let g = gattBattery[role] else { return adv }
-            guard let a = adv else { return g }
-            return (changedAt["adv\(role)"] ?? .distantPast) > (changedAt["gatt\(role)"] ?? .distantPast) ? a : g
-        }
-        var merged = advBattery
-        merged.left = pick(0x010D, advBattery.left)
-        merged.right = pick(0x010E, advBattery.right)
-        merged.caseLevel = pick(0x0110, advBattery.caseLevel)
-        if !gattBattery.isEmpty { merged.updated = Date() }
-        if merged != battery {
-            if (merged.left, merged.right, merged.caseLevel) != (battery.left, battery.right, battery.caseLevel) {
-                let t = { (v: Int?) in v.map { "\($0)" } ?? "–" }
-                note("Battery L \(t(merged.left)) R \(t(merged.right)) case \(t(merged.caseLevel))")
-            }
-            battery = merged
-        }
+    /// Starts, updates or ends the battery Live Activity to match the current state.
+    func syncLiveActivity() {
+        LiveBattery.sync(name: deviceName, battery: battery, connected: state == .ready,
+                         appActive: UIApplication.shared.applicationState == .active)
     }
 }
 
@@ -478,13 +477,10 @@ extension BudsController: CBCentralManagerDelegate {
             UserDefaults.standard.set(t, forKey: "pinna.adv.token")
         }
         guard decoded.token == nil || decoded.token == token else { return }
-        stamp("adv", 0x010D, decoded.a); stamp("adv", 0x010E, decoded.b); stamp("adv", 0x0110, decoded.caseLevel)
-        var b = advBattery
-        if let v = decoded.a { b.left = v }
-        if let v = decoded.b { b.right = v }
-        if let v = decoded.caseLevel { b.caseLevel = v }
-        b.updated = Date()
-        advBattery = b
+        merge.set(.adv, BatteryMerge.left, decoded.a)
+        merge.set(.adv, BatteryMerge.right, decoded.b)
+        merge.set(.adv, BatteryMerge.caseRole, decoded.caseLevel)
+        advUpdated = Date()
         if let id = AdvertisementDecoder.modelColorID(data), model == .unknown {
             model = BudsModel.detect(colorID: id)
         }
@@ -511,7 +507,7 @@ extension BudsController: CBCentralManagerDelegate {
             UserDefaults.standard.set(name, forKey: "pinna.name")
         }
         note("Connected to \(tag(p))")
-        rx = nil; batteryRoles.removeAll(); gattBattery.removeAll()
+        rx = nil; batteryRoles.removeAll(); merge.clear(.gatt)
         p.discoverServices([Self.dataPathService, Self.batteryService, Self.deviceInfo, Self.volumeService])
     }
 
@@ -534,7 +530,7 @@ extension BudsController: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral p: CBPeripheral, error: Error?) {
         guard p.identifier == peripheral?.identifier else { return }
         note("Disconnected \(tag(p))\(error.map { ": \($0.localizedDescription)" } ?? "")")
-        rx = nil; volumeControl = nil; volume = nil; gattBattery.removeAll()
+        rx = nil; volumeControl = nil; volume = nil; merge.clear(.gatt)
         publishBattery()
         if central.state == .poweredOn {
             // Reconnect right away; iOS completes it when the buds are back.
@@ -598,7 +594,7 @@ extension BudsController: CBPeripheralDelegate {
         let b = [UInt8](data)
         let role = Int(b[5]) | (Int(b[6]) << 8)
         batteryRoles[ObjectIdentifier(c)] = role
-        if let v = c.value?.first, v <= 100 { gattBattery[role] = Int(v); stamp("gatt", role, Int(v)) }
+        if let v = c.value?.first { merge.set(.gatt, role, Int(v)) }
         publishBattery()
     }
 
@@ -606,9 +602,8 @@ extension BudsController: CBPeripheralDelegate {
         guard error == nil, let data = c.value else { return }
         switch c.uuid {
         case Self.batteryLevel:
-            if let role = batteryRoles[ObjectIdentifier(c)], let v = data.first, v <= 100 {
-                gattBattery[role] = Int(v)
-                stamp("gatt", role, Int(v))
+            if let role = batteryRoles[ObjectIdentifier(c)], let v = data.first {
+                merge.set(.gatt, role, Int(v))
                 publishBattery()
             }
         case Self.modelNumber:

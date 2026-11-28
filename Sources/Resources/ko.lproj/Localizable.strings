@@ -200,3 +200,9 @@
 "More cards" = "더 많은 카드";
 "Done" = "완료";
 "Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "드래그하여 순서를 바꾸고 –를 탭하여 숨깁니다. 이어버드에 없는 기능의 카드는 표시되지 않습니다.";
+"Earbud battery low" = "이어버드 배터리 부족";
+"Report on GitHub" = "GitHub에 보고";
+"Battery on Lock Screen" = "잠금 화면에 배터리 표시";
+"Live Activity on the Lock Screen and in the Dynamic Island while the earbuds are connected" = "이어버드가 연결된 동안 잠금 화면과 Dynamic Island에 실시간 현황 표시";
+"Low battery alert" = "배터리 부족 알림";
+"Notifies you when an earbud is at 15 % or less" = "이어버드 배터리가 15 % 이하가 되면 알려 줍니다";

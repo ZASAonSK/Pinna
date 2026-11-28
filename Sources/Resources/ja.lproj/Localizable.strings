@@ -200,3 +200,9 @@
 "More cards" = "その他のカード";
 "Done" = "完了";
 "Drag to reorder, tap – to hide. Cards for features your earbuds don't have are not shown." = "ドラッグで並べ替え、– をタップで非表示にします。イヤホンにない機能のカードは表示されません。";
+"Earbud battery low" = "イヤホンのバッテリー残量低下";
+"Report on GitHub" = "GitHubで報告";
+"Battery on Lock Screen" = "ロック画面にバッテリーを表示";
+"Live Activity on the Lock Screen and in the Dynamic Island while the earbuds are connected" = "イヤホンの接続中、ロック画面とDynamic Islandにライブアクティビティを表示";
+"Low battery alert" = "バッテリー残量低下の通知";
+"Notifies you when an earbud is at 15 % or less" = "イヤホンの残量が15 %以下になると通知します";

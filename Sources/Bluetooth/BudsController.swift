@@ -364,6 +364,11 @@ final class BudsController: NSObject, ObservableObject {
     private func upsertNearby(id: UUID, name: String, rssi: Int, connected: Bool, audioHint: Bool = false) {
         let likely = BudsModel.looksLikeBuds(name) || id == knownID || connected || audioHint
         if let i = nearby.firstIndex(where: { $0.id == id }) {
+            // Scanning reports dozens of packets a second; publishing each one re-rendered
+            // every screen and made iOS 16 lag (1.9.0). The picker only needs ~30 s recency.
+            let n = nearby[i]
+            if Date().timeIntervalSince(n.lastSeen) < 5, n.name == name, n.likelyBuds || !likely,
+               n.connectedToPhone || !connected { return }
             nearby[i].name = name
             if rssi != 0 { nearby[i].rssi = rssi }
             nearby[i].lastSeen = Date()
@@ -380,8 +385,10 @@ final class BudsController: NSObject, ObservableObject {
         let merged = BatteryLevels(left: merge.value(BatteryMerge.left), right: merge.value(BatteryMerge.right),
                                    caseLevel: merge.value(BatteryMerge.caseRole),
                                    updated: merge.hasGATT ? Date() : advUpdated)
-        guard merged != battery else { return }
         let changed = (merged.left, merged.right, merged.caseLevel) != (battery.left, battery.right, battery.caseLevel)
+        // Same values: refresh the "updated" time at most every 30 s, not on every packet.
+        if !changed, let last = battery.updated, let now = merged.updated, now.timeIntervalSince(last) < 30 { return }
+        guard merged != battery else { return }
         battery = merged
         guard changed else { return }
         let t = { (v: Int?) in v.map { "\($0)" } ?? "–" }

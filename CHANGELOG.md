@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.1
+
+- Smoother app, especially on older iPhones with iOS 16: Bluetooth broadcasts (dozens a second) no longer redraw the whole screen each time – only real changes do.
+
 ## 1.9.0
 
 - **Battery on the Lock Screen as a Live Activity** (iOS 16.2+): left, right and case on the Lock Screen and in the Dynamic Island, updated on every change even with the app closed – widgets only get refreshed by iOS about every 30 minutes. Turn it on under *More features → Battery*. iOS ends it after 8 hours; opening Pinna starts it again.
